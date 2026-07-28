@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-// ⭐️ 빌드 에러 원인 해결: .js 확장자 제거 및 경로 수정
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Camera, RotateCcw, Eye } from 'lucide-react';
 import { MINIROOM_IMAGES } from '../data/miniroomImages';
@@ -88,7 +87,7 @@ export const MiniroomView: React.FC = () => {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.8;
+    renderer.toneMappingExposure = 0.85;
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
@@ -144,47 +143,55 @@ export const MiniroomView: React.FC = () => {
       roughness: 0.4,
     });
 
-    // Banners & Frames
+    // ⭐️ Banners & Frames (이미지 자체 밝기를 90% 수준으로 조정: color 0xe6e6e6)
+    const imgToneColor = 0xe6e6e6;
+
     const bannerMaterial = new THREE.MeshBasicMaterial({
       map: getTexture(MINIROOM_IMAGES.mainBanner, 'MAIN BANNER', 1024, 512, '#3f3f46'),
+      color: imgToneColor,
     });
     const frameMaterial = new THREE.MeshBasicMaterial({
       map: getTexture(MINIROOM_IMAGES.verticalFrame, 'FRAME (VERTICAL)', 512, 768, '#3f3f46'),
+      color: imgToneColor,
     });
     const horizontalFrameMaterial = new THREE.MeshBasicMaterial({
       map: getTexture(MINIROOM_IMAGES.horizontalFrame, 'FRAME (HORIZONTAL)', 768, 512, '#3f3f46'),
+      color: imgToneColor,
     });
     const standingBannerMaterial = new THREE.MeshBasicMaterial({
       map: getTexture(MINIROOM_IMAGES.standingBanner, 'STAND BANNER', 512, 1024, '#3f3f46'),
+      color: imgToneColor,
     });
     const counterBannerMat = new THREE.MeshBasicMaterial({
       map: getTexture(MINIROOM_IMAGES.counterPlancard, 'COUNTER PLANCARD', 1024, 256, '#27272a'),
+      color: imgToneColor,
     });
 
     // 아크릴 스탠드용 재질
-    const tablePropMat = new THREE.MeshStandardMaterial({
-      map: getTexture(MINIROOM_IMAGES.acrylicProp, 'ACRYLIC PROP', 256, 384, '#3f3f46'),
-      transparent: true,
-      roughness: 0.2,
-      side: THREE.DoubleSide,
+const tablePropMat = new THREE.MeshBasicMaterial({
+  map: getTexture(MINIROOM_IMAGES.acrylicProp, 'ACRYLIC PROP', 256, 384, '#3f3f46'),
+  transparent: true,
+  alphaTest: 0.5, // 0.5보다 투명한 영역은 잘라내서 깔끔하게 띄움!
+  side: THREE.DoubleSide,
     });
 
     const signboardMat = new THREE.MeshBasicMaterial({
       map: getTexture(MINIROOM_IMAGES.signboard, 'SIGNBOARD', 512, 768, '#3f3f46'),
+      color: imgToneColor,
     });
 
-    // 6. Lighting
-    const ambientLight = new THREE.AmbientLight('#e9d5ff', 0.35);
+    // 6. Lighting - 조명 밝기 30% 증가 💡
+    const ambientLight = new THREE.AmbientLight('#e9d5ff', 0.455); // 0.35 -> 0.455 (+30%)
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight('#ffffff', 0.6);
+    const mainLight = new THREE.DirectionalLight('#ffffff', 0.78); // 0.6 -> 0.78 (+30%)
     mainLight.position.set(5, 18, 10);
     mainLight.castShadow = true;
     mainLight.shadow.mapSize.width = 2048;
     mainLight.shadow.mapSize.height = 2048;
     scene.add(mainLight);
 
-    const pointLight = new THREE.PointLight('#c084fc', 0.7, 12);
+    const pointLight = new THREE.PointLight('#c084fc', 0.91, 12); // 0.7 -> 0.91 (+30%)
     pointLight.position.set(-3.5, 3.5, -2);
     scene.add(pointLight);
 
@@ -262,7 +269,7 @@ export const MiniroomView: React.FC = () => {
         const imgUrl = MINIROOM_IMAGES.photoGallery[idx] || 'image';
         const tex = getTexture(imgUrl, `PHOTO #${idx + 1}`, 256, 256, '#3f3f46');
         const geo = new THREE.PlaneGeometry(1.2, galleryRowHeight);
-        const mat = new THREE.MeshBasicMaterial({ map: tex });
+        const mat = new THREE.MeshBasicMaterial({ map: tex, color: imgToneColor });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(startX + 0.6, yPos, 0.01);
         photoGroup.add(mesh);
