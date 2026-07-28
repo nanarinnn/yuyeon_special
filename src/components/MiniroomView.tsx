@@ -15,7 +15,7 @@ export const MiniroomView: React.FC = () => {
     const container = containerRef.current;
 
     // --- Helper: Generate sleek Gray Placeholder Texture on HTML Canvas ---
-    function createGrayTexture(label: string, width = 512, height = 512, bgColor = '#3f3f46', textColor = '#e4e4e7') {
+    function createGrayTexture(label: string, width = 512, height = 512, bgColor = '#27272a', textColor = '#c084fc') {
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
@@ -24,8 +24,8 @@ export const MiniroomView: React.FC = () => {
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, width, height);
 
-        ctx.strokeStyle = '#71717a';
-        ctx.lineWidth = 8;
+        ctx.strokeStyle = '#52525b';
+        ctx.lineWidth = 6;
         ctx.strokeRect(12, 12, width - 24, height - 24);
 
         ctx.fillStyle = textColor;
@@ -39,37 +39,36 @@ export const MiniroomView: React.FC = () => {
       return texture;
     }
 
-    // Load Texture helper: if URL is "image" or fails, return gray texture
+    // Load Texture helper
     const textureLoader = new THREE.TextureLoader();
-    function getTexture(imageUrl: string, fallbackLabel: string, width = 512, height = 512, bgColor = '#3f3f46') {
+    function getTexture(imageUrl: string, fallbackLabel: string, width = 512, height = 512, bgColor = '#27272a') {
       if (!imageUrl || imageUrl === 'image') {
-        return createGrayTexture(`${fallbackLabel} [image]`, width, height, bgColor);
+        return createGrayTexture(`${fallbackLabel}`, width, height, bgColor);
       }
       try {
         const tex = textureLoader.load(imageUrl, undefined, undefined, () => {
-          // onError fallback
           console.warn(`Failed to load texture ${imageUrl}, using fallback.`);
         });
         return tex;
       } catch {
-        return createGrayTexture(`${fallbackLabel} [image]`, width, height, bgColor);
+        return createGrayTexture(`${fallbackLabel}`, width, height, bgColor);
       }
     }
 
-    // Color Config - Vibrant Birthday Cafe Theme
+    // 🎨 Color Config - 한 톤 다운된 딥 퍼플 모던 카페 톤
     const CONFIG = {
-      wallColor: '#e8e0f0',
-      floorColor: '#d8cce5',
-      counterColor: '#5c3d75',
-      counterTopColor: '#3a224c',
-      tableColor: '#ffffff',
-      chairColor: '#d1a3d1',
-      cupHolderColor: '#a855f7',
+      wallColor: '#a79ab8',        // 밝은 인디고 퍼플 -> 중후한 퍼플 그레이
+      floorColor: '#8c7d9e',       // 바닥도 차분하고 깊게 다운
+      counterColor: '#362247',     // 딥 다크 퍼플 카운터
+      counterTopColor: '#21132e',  // 카운터 상판 차분한 블랙 퍼플
+      tableColor: '#d4c9de',       // 테이블 쨍한 흰색에서 연회색 퍼플로 다운
+      chairColor: '#8a5c8a',       // 의자 차분한 다크 로즈 퍼플
+      cupHolderColor: '#7e22ce',   // 컵홀더 뚜껑 톤다운 퍼플
     };
 
     // 1. Scene Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#120c1f');
+    scene.background = new THREE.Color('#09060f'); // 배경도 더 깊은 다크톤으로
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(
@@ -88,9 +87,8 @@ export const MiniroomView: React.FC = () => {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = 0.85; // 노출값 다운으로 빛날림 방지
 
-    // Append canvas
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
@@ -124,20 +122,20 @@ export const MiniroomView: React.FC = () => {
     });
     const tableMaterial = new THREE.MeshStandardMaterial({
       color: CONFIG.tableColor,
-      roughness: 0.4,
+      roughness: 0.5,
     });
     const chairMaterial = new THREE.MeshStandardMaterial({
       color: CONFIG.chairColor,
       roughness: 0.5,
     });
     const metalMat = new THREE.MeshStandardMaterial({
-      color: 0xa1a1aa,
+      color: 0x71717a,
       metalness: 0.9,
-      roughness: 0.1,
+      roughness: 0.2,
     });
 
     const cupBodyMaterial = new THREE.MeshStandardMaterial({
-      map: getTexture(MINIROOM_IMAGES.cupHolder, 'CUP', 256, 256, '#3f3f46'),
+      map: getTexture(MINIROOM_IMAGES.cupHolder, 'CUP', 256, 256, '#27272a'),
       roughness: 0.4,
     });
     const cupCapMaterial = new THREE.MeshStandardMaterial({
@@ -145,45 +143,54 @@ export const MiniroomView: React.FC = () => {
       roughness: 0.4,
     });
 
-    // Banners & Frames (Configurable via MINIROOM_IMAGES in /src/data/miniroomImages.ts)
+    // Banners & Frames
     const bannerMaterial = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.mainBanner, 'MAIN BANNER', 1024, 512, '#3f3f46'),
+      map: getTexture(MINIROOM_IMAGES.mainBanner, 'MAIN BANNER', 1024, 512, '#27272a'),
     });
     const frameMaterial = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.verticalFrame, 'FRAME (VERTICAL)', 512, 768, '#3f3f46'),
+      map: getTexture(MINIROOM_IMAGES.verticalFrame, 'FRAME (VERTICAL)', 512, 768, '#27272a'),
     });
     const horizontalFrameMaterial = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.horizontalFrame, 'FRAME (HORIZONTAL)', 768, 512, '#3f3f46'),
+      map: getTexture(MINIROOM_IMAGES.horizontalFrame, 'FRAME (HORIZONTAL)', 768, 512, '#27272a'),
     });
     const standingBannerMaterial = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.standingBanner, 'STAND BANNER', 512, 1024, '#3f3f46'),
+      map: getTexture(MINIROOM_IMAGES.standingBanner, 'STAND BANNER', 512, 1024, '#27272a'),
     });
     const counterBannerMat = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.counterPlancard, 'COUNTER PLANCARD', 1024, 256, '#27272a'),
-    });
-    const tablePropMat = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.acrylicProp, 'ACRYLIC PROP', 256, 384, '#3f3f46'),
-    });
-    const signboardMat = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.signboard, 'SIGNBOARD', 512, 768, '#3f3f46'),
+      map: getTexture(MINIROOM_IMAGES.counterPlancard, 'COUNTER PLANCARD', 1024, 256, '#18181b'),
     });
 
-    // 6. Lighting
-    const ambientLight = new THREE.AmbientLight('#e9d5ff', 0.6);
+    // ⭐️ 아크릴 스탠드용 투명 재질 수정 (DoubleSide 적용)
+    const acrylicTexture = getTexture(MINIROOM_IMAGES.acrylicProp, 'ACRYLIC PROP', 256, 384, '#27272a');
+    const tablePropMat = new THREE.MeshStandardMaterial({
+      map: acrylicTexture,
+      transparent: true,
+      alphaTest: 0.1,
+      roughness: 0.1,
+      metalness: 0.1,
+      side: THREE.DoubleSide, // 양면 모두 보이게 설정
+    });
+
+    const signboardMat = new THREE.MeshBasicMaterial({
+      map: getTexture(MINIROOM_IMAGES.signboard, 'SIGNBOARD', 512, 768, '#27272a'),
+    });
+
+    // 6. Lighting - 전체적인 빛 강도를 낮추고 은은하게 변경
+    const ambientLight = new THREE.AmbientLight('#c4b5fd', 0.45); // 밝기 축소
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight('#ffffff', 1.0);
+    const mainLight = new THREE.DirectionalLight('#ffffff', 0.7); // 1.0 -> 0.7 조명 강도 다운
     mainLight.position.set(5, 18, 10);
     mainLight.castShadow = true;
     mainLight.shadow.mapSize.width = 2048;
     mainLight.shadow.mapSize.height = 2048;
     scene.add(mainLight);
 
-    const pointLight = new THREE.PointLight('#c084fc', 1.2, 12);
+    const pointLight = new THREE.PointLight('#a855f7', 0.9, 12);
     pointLight.position.set(-3.5, 3.5, -2);
     scene.add(pointLight);
 
-    // 7. Room Structure (Floor & Walls)
+    // 7. Room Structure
     const floorGeo = new THREE.BoxGeometry(14, 0.2, 14);
     const floor = new THREE.Mesh(floorGeo, floorMaterial);
     floor.position.y = -0.1;
@@ -242,7 +249,7 @@ export const MiniroomView: React.FC = () => {
     horizontalBorder.position.set(-6.89, 3.5, -0.3);
     scene.add(horizontalBorder);
 
-    // 11. Photo Gallery Grid on Left Wall (6 Photo Gallery Items)
+    // 11. Photo Gallery Grid on Left Wall
     const photoGroup = new THREE.Group();
     photoGroup.position.set(-6.85, 3.5, 4);
     photoGroup.rotation.y = Math.PI / 2;
@@ -255,7 +262,7 @@ export const MiniroomView: React.FC = () => {
       let startX = -((1.2 * photoIndices.length) + (galleryGap * (photoIndices.length - 1))) / 2;
       photoIndices.forEach((idx) => {
         const imgUrl = MINIROOM_IMAGES.photoGallery[idx] || 'image';
-        const tex = getTexture(imgUrl, `PHOTO #${idx + 1}`, 256, 256, '#3f3f46');
+        const tex = getTexture(imgUrl, `PHOTO #${idx + 1}`, 256, 256, '#27272a');
         const geo = new THREE.PlaneGeometry(1.2, galleryRowHeight);
         const mat = new THREE.MeshBasicMaterial({ map: tex });
         const mesh = new THREE.Mesh(geo, mat);
@@ -337,7 +344,7 @@ export const MiniroomView: React.FC = () => {
     counterBanner.position.set(0, 1.1, -0.39);
     scene.add(counterBanner);
 
-    // 14. Signboard (Front entrance stand)
+    // 14. Signboard
     const signboardGroup = new THREE.Group();
     signboardGroup.position.set(2.5, 0, 1.5);
     signboardGroup.rotation.y = -Math.PI / 6;
@@ -369,6 +376,7 @@ export const MiniroomView: React.FC = () => {
     pyramidPositions.forEach((pos) => {
       const cup = new THREE.Mesh(cupHolderGeo, cupMaterials);
       cup.position.set(pos.x, pos.y, pos.z);
+      cup.rotation.y = Math.PI; // 컵홀더 정면 보게 180도 회전
       cup.castShadow = true;
       scene.add(cup);
     });
@@ -385,7 +393,7 @@ export const MiniroomView: React.FC = () => {
     standingBannerGroup.add(sbMesh);
 
     const sbBackGeo = new THREE.PlaneGeometry(1.4, 3.2);
-    const sbBackMat = new THREE.MeshStandardMaterial({ color: 0x27272a });
+    const sbBackMat = new THREE.MeshStandardMaterial({ color: 0x18181b });
     const sbBack = new THREE.Mesh(sbBackGeo, sbBackMat);
     sbBack.rotation.y = Math.PI;
     sbBack.position.set(0, 1.6, 0.04);
@@ -393,7 +401,7 @@ export const MiniroomView: React.FC = () => {
 
     const poleGeo = new THREE.CylinderGeometry(0.03, 0.03, 3.6);
     const poleMat = new THREE.MeshStandardMaterial({
-      color: 0x71717a,
+      color: 0x52525b,
       metalness: 0.6,
       roughness: 0.2,
     });
@@ -408,7 +416,7 @@ export const MiniroomView: React.FC = () => {
     standingBannerGroup.add(pole2);
     scene.add(standingBannerGroup);
 
-    // 17. Circular Table & Acrylic Stand
+    // 17. Circular Table & Acrylic Stand (아크릴 스탠드 위치 및 재질 보완)
     const tableGroup = new THREE.Group();
     tableGroup.position.set(0, 0, 4.5);
 
@@ -420,7 +428,7 @@ export const MiniroomView: React.FC = () => {
 
     const tableLegGeo = new THREE.CylinderGeometry(0.15, 0.15, 1.6, 16);
     const tableLegMat = new THREE.MeshStandardMaterial({
-      color: 0x3f3f46,
+      color: 0x27272a,
       metalness: 0.5,
       roughness: 0.3,
     });
@@ -435,15 +443,17 @@ export const MiniroomView: React.FC = () => {
     tableGroup.add(tableBase);
     scene.add(tableGroup);
 
-    const tablePropGeo = new THREE.PlaneGeometry(0.4, 0.6);
+    // ⭐️ 아크릴 스탠드 본체 (테이블 위)
+    const tablePropGeo = new THREE.PlaneGeometry(0.6, 0.9);
     const tableProp = new THREE.Mesh(tablePropGeo, tablePropMat);
-    tableProp.position.set(0, 1.95, 4.5);
-    tableProp.rotation.y = -Math.PI / 4;
+    tableProp.position.set(0, 2.1, 4.5);
+    tableProp.rotation.y = -Math.PI / 6;
     scene.add(tableProp);
 
-    const tablePropBase = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.1), metalMat);
-    tablePropBase.position.set(0, 1.65, 4.5);
-    tablePropBase.rotation.y = -Math.PI / 4;
+    // 아크릴 받침대
+    const tablePropBase = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.04, 0.15), metalMat);
+    tablePropBase.position.set(0, 1.67, 4.5);
+    tablePropBase.rotation.y = -Math.PI / 6;
     scene.add(tablePropBase);
 
     // 18. Chairs
@@ -543,7 +553,7 @@ export const MiniroomView: React.FC = () => {
         </p>
       </div>
 
-      {/* Camera Preset Toolbar - Single line buttons with whitespace-nowrap */}
+      {/* Camera Preset Toolbar */}
       <div className="flex flex-nowrap justify-center items-center gap-1.5 sm:gap-2 mb-6 bg-[#18181B] border border-[#3F3F46] p-1.5 rounded-none text-xs font-bold uppercase tracking-wider max-w-full overflow-x-auto">
         <button
           onClick={() => resetCamera('default')}
@@ -580,13 +590,9 @@ export const MiniroomView: React.FC = () => {
         </button>
       </div>
 
-      {/* Canvas Container - StudioBlank Flat Frame */}
+      {/* Canvas Container */}
       <div className="w-full max-w-[900px] h-[420px] sm:h-[550px] bg-[#18181B] border border-[#3F3F46] rounded-none overflow-hidden relative shadow-none touch-none">
         <div ref={containerRef} className="w-full h-full" />
-      </div>
-
-      <div className="text-[11px] text-[#71717A] mt-4 text-center font-mono uppercase tracking-wider max-w-md break-keep px-2">
-        * 미니룸의 모든 배너, 액자, 입간판 등은 <code className="text-[#c084fc]">/src/data/miniroomImages.ts</code>의 <code className="text-[#c084fc]">"image"</code> 부분에 원하시는 경로를 입력하여 변경하실 수 있습니다.
       </div>
     </div>
   );
