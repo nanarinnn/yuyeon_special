@@ -1,20 +1,8 @@
-import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
+import React, { useState, useEffect } from 'react';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const app = express();
-const PORT = 3000;
-
-app.use(express.json());
-
-// 0. Guestbook Shared Backend Proxy (Connected to Supabase)
+// Supabase 직접 연동 설정
 const SUPABASE_URL = "https://tuqwintstnimajksseir.supabase.co";
-const SUPABASE_KEY = "sb_publishable_BDeUxFjo_f9VoNauPcov6Q_PISeqgip";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1cXdpbnRzdG5pbWFqa3NzZWlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUyMjM5OTEsImV4cCI6MjEwMDc5OTk5MX0.EhvBzznSEbf9WgWabcA6Sfx4Qfz5-7Sw_1rRzPFaJO8";
 const PAGE_ID = "yuyeon_birthday_external";
 
 interface GuestbookItem {
@@ -25,457 +13,171 @@ interface GuestbookItem {
   created_at: string;
 }
 
-let localGuestbookStore: GuestbookItem[] = [
-  {
-    page_id: PAGE_ID,
-    nickname: "나나링",
-    content: "테스트용입니다 ! Σ(￣□￣;)",
-    created_at: new Date(Date.now() - 3600000).toISOString(),
-  },
-];
+export const GuestbookView: React.FC = () => {
+  const [messages, setMessages] = useState<GuestbookItem[]>([]);
+  const [nickname, setNickname] = useState('');
+  const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(false);
 
-app.get("/api/guestbook", async (req, res) => {
-  try {
-    const supabaseRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/guestbook?page_id=eq.${PAGE_ID}`,
-      {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          Accept: "application/json",
-        },
+  // 1. Supabase REST API로 방명록 데이터 불러오기
+  const fetchMessages = async () => {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/guestbook?page_id=eq.${PAGE_ID}&order=created_at.desc`,
+        {
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            Accept: "application/json",
+          },
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data);
+      } else {
+        console.error("방명록 로딩 실패:", await res.text());
       }
-    );
-
-    let supabaseData: any[] = [];
-    if (supabaseRes.ok) {
-      supabaseData = await supabaseRes.json();
-    } else {
-      console.warn("Supabase fetch error:", await supabaseRes.text());
+    } catch (err) {
+      console.error("방명록 요청 에러:", err);
     }
-
-    const processedSupabase: GuestbookItem[] = supabaseData.map((item, idx) => ({
-      id: item.id || `sp_${idx}`,
-      page_id: item.page_id || PAGE_ID,
-      nickname: item.nickname || "익명",
-      content: item.content || "",
-      created_at: item.created_at || new Date().toISOString(),
-    }));
-
-    const combined = [...localGuestbookStore, ...processedSupabase];
-    const uniqueMap = new Map<string, GuestbookItem>();
-
-    combined.forEach((msg) => {
-      const key = `${msg.nickname.trim()}_${msg.content.trim()}`;
-      if (!uniqueMap.has(key)) {
-        uniqueMap.set(key, msg);
-      }
-    });
-
-    const resultList = Array.from(uniqueMap.values()).reverse();
-    res.json(resultList);
-  } catch (err: any) {
-    console.error("Guestbook fetch error:", err);
-    res.json(localGuestbookStore);
-  }
-});
-
-app.post("/api/guestbook", async (req, res) => {
-  const { nickname, content } = req.body;
-  if (!nickname || !content) {
-    return res.status(400).json({ error: "Nickname and content are required." });
-  }
-
-  const newItem: GuestbookItem = {
-    page_id: PAGE_ID,
-    nickname: nickname.trim(),
-    content: content.trim(),
-    created_at: new Date().toISOString(),
   };
 
-  localGuestbookStore.push(newItem);
+  useEffect(() => {
+    fetchMessages();
+  }, []);
 
-  let supabaseSuccess = false;
-  try {
-    const supabaseRes = await fetch(`${SUPABASE_URL}/rest/v1/guestbook`, {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify({
-        page_id: PAGE_ID,
-        nickname: newItem.nickname,
-        content: newItem.content,
-      }),
-    });
-
-    if (supabaseRes.ok) {
-      supabaseSuccess = true;
-    } else {
-      console.error("Supabase POST error:", await supabaseRes.text());
-    }
-  } catch (err: any) {
-    console.error("Failed to reach Supabase:", err);
-  }
-
-  res.json({
-    success: true,
-    supabaseSuccess,
-    message: newItem,
-  });
-});
-
-// Lazy Gemini AI initialization
-let aiClient: GoogleGenAI | null = null;
-function getGeminiClient(): GoogleGenAI | null {
-  if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (apiKey) {
-      aiClient = new GoogleGenAI({ apiKey });
-    }
-  }
-  return aiClient;
-}
-
-// 1. OAuth URL Endpoint
-app.get("/api/auth/github/url", (req, res) => {
-  const clientId = process.env.GITHUB_CLIENT_ID;
-  const appUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
-  const redirectUri = `${appUrl.replace(/\/$/, "")}/auth/github/callback`;
-
-  if (!clientId) {
-    return res.json({
-      configured: false,
-      redirectUri,
-      message: "GITHUB_CLIENT_ID environment variable is not configured.",
-    });
-  }
-
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    scope: "read:user,repo,user:email,notifications",
-  });
-
-  const authUrl = `https://github.com/login/oauth/authorize?${params.toString()}`;
-  res.json({
-    configured: true,
-    redirectUri,
-    url: authUrl,
-  });
-});
-
-// 2. OAuth Callback Handler
-const handleCallback = async (req: express.Request, res: express.Response) => {
-  const { code } = req.query;
-  const clientId = process.env.GITHUB_CLIENT_ID;
-  const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-
-  if (!code || typeof code !== "string") {
-    return res.status(400).send("Missing authorization code from GitHub.");
-  }
-
-  try {
-    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-      }),
-    });
-
-    const tokenData = await tokenRes.json();
-
-    if (tokenData.error) {
-      return res.status(400).send(`GitHub OAuth Error: ${tokenData.error_description || tokenData.error}`);
+  // 2. Supabase REST API로 방명록 작성하기
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nickname.trim() || !content.trim()) {
+      alert("닉네임과 내용을 모두 입력해 주세요!");
+      return;
     }
 
-    const accessToken = tokenData.access_token;
-
-    // Return HTML page that sends message to opener window and closes popup
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>GitHub Connection Successful</title>
-          <style>
-            body {
-              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              height: 100vh;
-              margin: 0;
-              background-color: #0d1117;
-              color: #c9d1d9;
-            }
-            .card {
-              background: #161b22;
-              border: 1px solid #30363d;
-              padding: 24px 32px;
-              border-radius: 12px;
-              text-align: center;
-              box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            }
-            .icon {
-              font-size: 48px;
-              margin-bottom: 16px;
-            }
-            h2 { margin: 0 0 8px 0; color: #58a6ff; }
-            p { color: #8b949e; font-size: 14px; margin: 0; }
-          </style>
-        </head>
-        <body>
-          <div class="card">
-            <div class="icon">🐙</div>
-            <h2>GitHub Connected!</h2>
-            <p>Closing window and returning to application...</p>
-          </div>
-          <script>
-            if (window.opener) {
-              window.opener.postMessage({
-                type: 'OAUTH_AUTH_SUCCESS',
-                provider: 'github',
-                token: ${JSON.stringify(accessToken)}
-              }, '*');
-              setTimeout(() => { window.close(); }, 1200);
-            } else {
-              window.location.href = '/';
-            }
-          </script>
-        </body>
-      </html>
-    `);
-  } catch (err: any) {
-    console.error("OAuth callback error:", err);
-    res.status(500).send(`Authentication failed: ${err?.message || err}`);
-  }
-};
-
-app.get("/auth/github/callback", handleCallback);
-app.get("/auth/github/callback/", handleCallback);
-
-// Helper for GitHub API requests
-async function fetchFromGitHub(endpoint: string, token: string, options: RequestInit = {}) {
-  const url = endpoint.startsWith("http") ? endpoint : `https://api.github.com${endpoint}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      Accept: "application/vnd.github.v3+json",
-      "User-Agent": "GitHub-Connect-Hub-App",
-      Authorization: `Bearer ${token}`,
-      ...(options.headers || {}),
-    },
-  });
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-    let parsedMessage = errorBody;
+    setLoading(true);
     try {
-      const parsed = JSON.parse(errorBody);
-      parsedMessage = parsed.message || errorBody;
-    } catch (_) {}
-    throw new Error(`GitHub API Error (${response.status}): ${parsedMessage}`);
-  }
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/guestbook`, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation", // 작성 완료 후 생성된 데이터 반환
+        },
+        body: JSON.stringify({
+          page_id: PAGE_ID,
+          nickname: nickname.trim(),
+          content: content.trim(),
+        }),
+      });
 
-  return response.json();
-}
+      if (res.ok) {
+        setNickname('');
+        setContent('');
+        fetchMessages(); // 작성 완료 후 방명록 목록 즉시 새로고침
+      } else {
+        const errText = await res.text();
+        alert(`저장 실패: ${errText}`);
+      }
+    } catch (err) {
+      console.error("방명록 작성 에러:", err);
+      alert("방명록을 저장하지 못했습니다. 다시 시도해 주세요.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-// 3. GitHub API Proxy Endpoints
-app.get("/api/github/user", async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ error: "Missing GitHub access token" });
+  return (
+    <div className="min-h-screen bg-[#0A0A0A] text-[#FAFAFA] flex flex-col items-center justify-start pt-20 sm:pt-24 pb-16 px-4 select-none">
+      {/* 타이틀 헤더 */}
+      <div className="text-center mb-8 max-w-xl px-2">
+        <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c084fc] mb-1 font-bold">
+          GUESTBOOK
+        </div>
+        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-[#FAFAFA] mb-2">
+          방명록을 남겨주세요
+        </h1>
+        <p className="text-[11px] sm:text-xs text-[#A1A1AA] leading-normal break-keep">
+          유연이의 생일을 축하하는 한마디를 자유롭게 남겨주세요!
+        </p>
+      </div>
 
-  try {
-    const userData = await fetchFromGitHub("/user", token);
-    res.json(userData);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
+      {/* 방명록 작성 폼 */}
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-xl bg-[#18181B] border border-[#3F3F46] p-4 sm:p-6 mb-8 space-y-4 shadow-xl"
+      >
+        <div>
+          <label className="block text-xs font-bold text-[#A1A1AA] mb-1 uppercase tracking-wider">
+            닉네임
+          </label>
+          <input
+            type="text"
+            placeholder="닉네임을 입력하세요"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            maxLength={20}
+            className="w-full bg-[#0A0A0A] border border-[#3F3F46] focus:border-[#c084fc] text-xs text-[#FAFAFA] px-3 py-2.5 outline-none transition-colors"
+          />
+        </div>
 
-app.get("/api/github/repos", async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ error: "Missing GitHub access token" });
+        <div>
+          <label className="block text-xs font-bold text-[#A1A1AA] mb-1 uppercase tracking-wider">
+            메시지
+          </label>
+          <textarea
+            placeholder="축하 메시지를 입력하세요 (최대 200자)"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            maxLength={200}
+            rows={4}
+            className="w-full bg-[#0A0A0A] border border-[#3F3F46] focus:border-[#c084fc] text-xs text-[#FAFAFA] p-3 outline-none transition-colors resize-none"
+          />
+        </div>
 
-  try {
-    const repos = await fetchFromGitHub("/user/repos?sort=updated&per_page=100&type=all", token);
-    res.json(repos);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-2.5 bg-[#a855f7] hover:bg-[#c084fc] text-[#FAFAFA] font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer active:scale-95"
+        >
+          {loading ? "등록 중..." : "메시지 남기기"}
+        </button>
+      </form>
 
-app.get("/api/github/orgs", async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ error: "Missing GitHub access token" });
-
-  try {
-    const orgs = await fetchFromGitHub("/user/orgs", token);
-    res.json(orgs);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/api/github/events", async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  const username = req.query.username as string;
-  if (!token) return res.status(401).json({ error: "Missing GitHub access token" });
-  if (!username) return res.status(400).json({ error: "Missing username parameter" });
-
-  try {
-    const events = await fetchFromGitHub(`/users/${username}/events?per_page=30`, token);
-    res.json(events);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/api/github/starred", async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ error: "Missing GitHub access token" });
-
-  try {
-    const starred = await fetchFromGitHub("/user/starred?per_page=50", token);
-    res.json(starred);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/api/github/repo/details", async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  const owner = req.query.owner as string;
-  const repo = req.query.repo as string;
-
-  if (!token) return res.status(401).json({ error: "Missing GitHub access token" });
-  if (!owner || !repo) return res.status(400).json({ error: "Missing owner or repo parameter" });
-
-  try {
-    const [repoInfo, commits, issues, pullRequests, readme] = await Promise.allSettled([
-      fetchFromGitHub(`/repos/${owner}/${repo}`, token),
-      fetchFromGitHub(`/repos/${owner}/${repo}/commits?per_page=15`, token),
-      fetchFromGitHub(`/repos/${owner}/${repo}/issues?state=all&per_page=15`, token),
-      fetchFromGitHub(`/repos/${owner}/${repo}/pulls?state=all&per_page=15`, token),
-      fetchFromGitHub(`/repos/${owner}/${repo}/readme`, token),
-    ]);
-
-    res.json({
-      info: repoInfo.status === "fulfilled" ? repoInfo.value : null,
-      commits: commits.status === "fulfilled" ? commits.value : [],
-      issues: issues.status === "fulfilled" ? issues.value : [],
-      pullRequests: pullRequests.status === "fulfilled" ? pullRequests.value : [],
-      readme: readme.status === "fulfilled" ? readme.value : null,
-    });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post("/api/github/issues", async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  const { owner, repo, title, body, labels } = req.body;
-
-  if (!token) return res.status(401).json({ error: "Missing GitHub access token" });
-  if (!owner || !repo || !title) return res.status(400).json({ error: "Missing owner, repo, or title" });
-
-  try {
-    const issue = await fetchFromGitHub(`/repos/${owner}/${repo}/issues`, token, {
-      method: "POST",
-      body: JSON.stringify({ title, body, labels: labels || [] }),
-    });
-    res.json(issue);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.put("/api/github/star", async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  const { owner, repo } = req.body;
-
-  if (!token) return res.status(401).json({ error: "Missing GitHub access token" });
-
-  try {
-    await fetchFromGitHub(`/user/starred/${owner}/${repo}`, token, { method: "PUT" });
-    res.json({ success: true, starred: true });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.delete("/api/github/star", async (req, res) => {
-  const token = req.headers.authorization?.replace("Bearer ", "");
-  const { owner, repo } = req.body;
-
-  if (!token) return res.status(401).json({ error: "Missing GitHub access token" });
-
-  try {
-    await fetchFromGitHub(`/user/starred/${owner}/${repo}`, token, { method: "DELETE" });
-    res.json({ success: true, starred: false });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// 4. Gemini AI Insights Endpoint
-app.post("/api/github/ai-summary", async (req, res) => {
-  const { prompt, userData, repoData, language = "ko" } = req.body;
-  const gemini = getGeminiClient();
-
-  if (!gemini) {
-    return res.status(500).json({
-      error: "Gemini API key is missing or not configured in environment.",
-    });
-  }
-
-  try {
-    const systemInstruction = `You are a GitHub portfolio and repository AI expert analyst.
-Your task is to analyze GitHub profiles, repository code, commit logs, or activity and provide insightful, structured summaries in ${language === "ko" ? "Korean (한국어)" : "English"}.
-Use markdown formatting with key bullet points, concise technical badges, and actionable suggestions.`;
-
-    const fullPrompt = `${systemInstruction}\n\nContext Data:\nUser: ${JSON.stringify(userData || {})}\nRepo Context: ${JSON.stringify(repoData || {})}\n\nUser Request: ${prompt}`;
-
-    const response = await gemini.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: fullPrompt,
-    });
-
-    res.json({ result: response.text });
-  } catch (err: any) {
-    res.status(500).json({ error: `Gemini AI error: ${err.message}` });
-  }
-});
-
-// Vite Middleware for development / static serving for production
-async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`GitHub Connect Hub server running on http://0.0.0.0:${PORT}`);
-  });
-}
-
-startServer();
+      {/* 방명록 데이터 목록 */}
+      <div className="w-full max-w-xl space-y-3">
+        {messages.length === 0 ? (
+          <div className="text-center py-12 bg-[#18181B] border border-[#27272A] text-[#71717A] text-xs">
+            첫 번째 축하 메시지를 남겨보세요!
+          </div>
+        ) : (
+          messages.map((msg, idx) => (
+            <div
+              key={msg.id || idx}
+              className="bg-[#18181B] border border-[#27272A] p-4 hover:border-[#3F3F46] transition-colors"
+            >
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-bold text-xs text-[#c084fc]">
+                  {msg.nickname}
+                </span>
+                <span className="text-[10px] text-[#71717A] font-mono">
+                  {new Date(msg.created_at).toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+              </div>
+              <p className="text-xs text-[#E4E4E7] leading-relaxed whitespace-pre-wrap break-words">
+                {msg.content}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
