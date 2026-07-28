@@ -14,8 +14,8 @@ export const MiniroomView: React.FC = () => {
     if (!containerRef.current) return;
     const container = containerRef.current;
 
-    // --- Helper: Generate sleek Gray Placeholder Texture on HTML Canvas ---
-    function createGrayTexture(label: string, width = 512, height = 512, bgColor = '#27272a', textColor = '#c084fc') {
+    // --- Helper: Generate Gray Placeholder Texture on HTML Canvas ---
+    function createGrayTexture(label: string, width = 512, height = 512, bgColor = '#3f3f46', textColor = '#e4e4e7') {
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
@@ -24,8 +24,8 @@ export const MiniroomView: React.FC = () => {
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, width, height);
 
-        ctx.strokeStyle = '#52525b';
-        ctx.lineWidth = 6;
+        ctx.strokeStyle = '#71717a';
+        ctx.lineWidth = 8;
         ctx.strokeRect(12, 12, width - 24, height - 24);
 
         ctx.fillStyle = textColor;
@@ -41,7 +41,7 @@ export const MiniroomView: React.FC = () => {
 
     // Load Texture helper
     const textureLoader = new THREE.TextureLoader();
-    function getTexture(imageUrl: string, fallbackLabel: string, width = 512, height = 512, bgColor = '#27272a') {
+    function getTexture(imageUrl: string, fallbackLabel: string, width = 512, height = 512, bgColor = '#3f3f46') {
       if (!imageUrl || imageUrl === 'image') {
         return createGrayTexture(`${fallbackLabel}`, width, height, bgColor);
       }
@@ -55,20 +55,20 @@ export const MiniroomView: React.FC = () => {
       }
     }
 
-    // 🎨 Color Config - 한 톤 다운된 딥 퍼플 모던 카페 톤
+    // 🎨 Color Config - 원래대로 예쁜 보라/분홍 톤 복구!
     const CONFIG = {
-      wallColor: '#a79ab8',        // 밝은 인디고 퍼플 -> 중후한 퍼플 그레이
-      floorColor: '#8c7d9e',       // 바닥도 차분하고 깊게 다운
-      counterColor: '#362247',     // 딥 다크 퍼플 카운터
-      counterTopColor: '#21132e',  // 카운터 상판 차분한 블랙 퍼플
-      tableColor: '#d4c9de',       // 테이블 쨍한 흰색에서 연회색 퍼플로 다운
-      chairColor: '#8a5c8a',       // 의자 차분한 다크 로즈 퍼플
-      cupHolderColor: '#7e22ce',   // 컵홀더 뚜껑 톤다운 퍼플
+      wallColor: '#e8e0f0',
+      floorColor: '#d8cce5',
+      counterColor: '#5c3d75',
+      counterTopColor: '#3a224c',
+      tableColor: '#ffffff',
+      chairColor: '#d1a3d1',
+      cupHolderColor: '#a855f7',
     };
 
     // 1. Scene Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#09060f'); // 배경도 더 깊은 다크톤으로
+    scene.background = new THREE.Color('#120c1f');
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(
@@ -80,14 +80,14 @@ export const MiniroomView: React.FC = () => {
     camera.position.set(0, 15, 17);
     cameraRef.current = camera;
 
-    // 3. Renderer Setup
+    // 3. Renderer Setup (빛 노출량 조정)
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.85; // 노출값 다운으로 빛날림 방지
+    renderer.toneMappingExposure = 0.8; // ⭐️ 노출을 0.8로 낮춰 눈부심 감소
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
@@ -122,20 +122,20 @@ export const MiniroomView: React.FC = () => {
     });
     const tableMaterial = new THREE.MeshStandardMaterial({
       color: CONFIG.tableColor,
-      roughness: 0.5,
+      roughness: 0.4,
     });
     const chairMaterial = new THREE.MeshStandardMaterial({
       color: CONFIG.chairColor,
       roughness: 0.5,
     });
     const metalMat = new THREE.MeshStandardMaterial({
-      color: 0x71717a,
+      color: 0xa1a1aa,
       metalness: 0.9,
-      roughness: 0.2,
+      roughness: 0.1,
     });
 
     const cupBodyMaterial = new THREE.MeshStandardMaterial({
-      map: getTexture(MINIROOM_IMAGES.cupHolder, 'CUP', 256, 256, '#27272a'),
+      map: getTexture(MINIROOM_IMAGES.cupHolder, 'CUP', 256, 256, '#3f3f46'),
       roughness: 0.4,
     });
     const cupCapMaterial = new THREE.MeshStandardMaterial({
@@ -145,48 +145,45 @@ export const MiniroomView: React.FC = () => {
 
     // Banners & Frames
     const bannerMaterial = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.mainBanner, 'MAIN BANNER', 1024, 512, '#27272a'),
+      map: getTexture(MINIROOM_IMAGES.mainBanner, 'MAIN BANNER', 1024, 512, '#3f3f46'),
     });
     const frameMaterial = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.verticalFrame, 'FRAME (VERTICAL)', 512, 768, '#27272a'),
+      map: getTexture(MINIROOM_IMAGES.verticalFrame, 'FRAME (VERTICAL)', 512, 768, '#3f3f46'),
     });
     const horizontalFrameMaterial = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.horizontalFrame, 'FRAME (HORIZONTAL)', 768, 512, '#27272a'),
+      map: getTexture(MINIROOM_IMAGES.horizontalFrame, 'FRAME (HORIZONTAL)', 768, 512, '#3f3f46'),
     });
     const standingBannerMaterial = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.standingBanner, 'STAND BANNER', 512, 1024, '#27272a'),
+      map: getTexture(MINIROOM_IMAGES.standingBanner, 'STAND BANNER', 512, 1024, '#3f3f46'),
     });
     const counterBannerMat = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.counterPlancard, 'COUNTER PLANCARD', 1024, 256, '#18181b'),
+      map: getTexture(MINIROOM_IMAGES.counterPlancard, 'COUNTER PLANCARD', 1024, 256, '#27272a'),
     });
 
-    // ⭐️ 아크릴 스탠드용 투명 재질 수정 (DoubleSide 적용)
-    const acrylicTexture = getTexture(MINIROOM_IMAGES.acrylicProp, 'ACRYLIC PROP', 256, 384, '#27272a');
+    // ⭐️ 아크릴 스탠드용 투명 재질 수정
     const tablePropMat = new THREE.MeshStandardMaterial({
-      map: acrylicTexture,
+      map: getTexture(MINIROOM_IMAGES.acrylicProp, 'ACRYLIC PROP', 256, 384, '#3f3f46'),
       transparent: true,
-      alphaTest: 0.1,
-      roughness: 0.1,
-      metalness: 0.1,
-      side: THREE.DoubleSide, // 양면 모두 보이게 설정
+      roughness: 0.2,
+      side: THREE.DoubleSide,
     });
 
     const signboardMat = new THREE.MeshBasicMaterial({
-      map: getTexture(MINIROOM_IMAGES.signboard, 'SIGNBOARD', 512, 768, '#27272a'),
+      map: getTexture(MINIROOM_IMAGES.signboard, 'SIGNBOARD', 512, 768, '#3f3f46'),
     });
 
-    // 6. Lighting - 전체적인 빛 강도를 낮추고 은은하게 변경
-    const ambientLight = new THREE.AmbientLight('#c4b5fd', 0.45); // 밝기 축소
+    // 6. Lighting - 조명 밝기만 깔끔하게 낮춤! 💡
+    const ambientLight = new THREE.AmbientLight('#e9d5ff', 0.35); // 0.6 -> 0.35 은은하게 낮춤
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight('#ffffff', 0.7); // 1.0 -> 0.7 조명 강도 다운
+    const mainLight = new THREE.DirectionalLight('#ffffff', 0.6); // 1.0 -> 0.6 조명 밝기 낮춤
     mainLight.position.set(5, 18, 10);
     mainLight.castShadow = true;
     mainLight.shadow.mapSize.width = 2048;
     mainLight.shadow.mapSize.height = 2048;
     scene.add(mainLight);
 
-    const pointLight = new THREE.PointLight('#a855f7', 0.9, 12);
+    const pointLight = new THREE.PointLight('#c084fc', 0.7, 12); // 1.2 -> 0.7 포인트 조명 낮춤
     pointLight.position.set(-3.5, 3.5, -2);
     scene.add(pointLight);
 
@@ -262,7 +259,7 @@ export const MiniroomView: React.FC = () => {
       let startX = -((1.2 * photoIndices.length) + (galleryGap * (photoIndices.length - 1))) / 2;
       photoIndices.forEach((idx) => {
         const imgUrl = MINIROOM_IMAGES.photoGallery[idx] || 'image';
-        const tex = getTexture(imgUrl, `PHOTO #${idx + 1}`, 256, 256, '#27272a');
+        const tex = getTexture(imgUrl, `PHOTO #${idx + 1}`, 256, 256, '#3f3f46');
         const geo = new THREE.PlaneGeometry(1.2, galleryRowHeight);
         const mat = new THREE.MeshBasicMaterial({ map: tex });
         const mesh = new THREE.Mesh(geo, mat);
@@ -362,7 +359,7 @@ export const MiniroomView: React.FC = () => {
     signboardGroup.add(signBack);
     scene.add(signboardGroup);
 
-    // 15. Cup Holder Pyramid
+    // 15. Cup Holder Pyramid (180도 회전 유지)
     const cupHolderGeo = new THREE.CylinderGeometry(0.25, 0.18, 0.5, 16);
     const cupMaterials = [cupBodyMaterial, cupCapMaterial, cupCapMaterial];
     const pyramidPositions = [
@@ -376,7 +373,7 @@ export const MiniroomView: React.FC = () => {
     pyramidPositions.forEach((pos) => {
       const cup = new THREE.Mesh(cupHolderGeo, cupMaterials);
       cup.position.set(pos.x, pos.y, pos.z);
-      cup.rotation.y = Math.PI; // 컵홀더 정면 보게 180도 회전
+      cup.rotation.y = Math.PI;
       cup.castShadow = true;
       scene.add(cup);
     });
@@ -393,7 +390,7 @@ export const MiniroomView: React.FC = () => {
     standingBannerGroup.add(sbMesh);
 
     const sbBackGeo = new THREE.PlaneGeometry(1.4, 3.2);
-    const sbBackMat = new THREE.MeshStandardMaterial({ color: 0x18181b });
+    const sbBackMat = new THREE.MeshStandardMaterial({ color: 0x27272a });
     const sbBack = new THREE.Mesh(sbBackGeo, sbBackMat);
     sbBack.rotation.y = Math.PI;
     sbBack.position.set(0, 1.6, 0.04);
@@ -401,7 +398,7 @@ export const MiniroomView: React.FC = () => {
 
     const poleGeo = new THREE.CylinderGeometry(0.03, 0.03, 3.6);
     const poleMat = new THREE.MeshStandardMaterial({
-      color: 0x52525b,
+      color: 0x71717a,
       metalness: 0.6,
       roughness: 0.2,
     });
@@ -416,7 +413,7 @@ export const MiniroomView: React.FC = () => {
     standingBannerGroup.add(pole2);
     scene.add(standingBannerGroup);
 
-    // 17. Circular Table & Acrylic Stand (아크릴 스탠드 위치 및 재질 보완)
+    // 17. Circular Table & Acrylic Stand
     const tableGroup = new THREE.Group();
     tableGroup.position.set(0, 0, 4.5);
 
@@ -428,7 +425,7 @@ export const MiniroomView: React.FC = () => {
 
     const tableLegGeo = new THREE.CylinderGeometry(0.15, 0.15, 1.6, 16);
     const tableLegMat = new THREE.MeshStandardMaterial({
-      color: 0x27272a,
+      color: 0x3f3f46,
       metalness: 0.5,
       roughness: 0.3,
     });
@@ -443,14 +440,13 @@ export const MiniroomView: React.FC = () => {
     tableGroup.add(tableBase);
     scene.add(tableGroup);
 
-    // ⭐️ 아크릴 스탠드 본체 (테이블 위)
+    // 아크릴 스탠드
     const tablePropGeo = new THREE.PlaneGeometry(0.6, 0.9);
     const tableProp = new THREE.Mesh(tablePropGeo, tablePropMat);
     tableProp.position.set(0, 2.1, 4.5);
     tableProp.rotation.y = -Math.PI / 6;
     scene.add(tableProp);
 
-    // 아크릴 받침대
     const tablePropBase = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.04, 0.15), metalMat);
     tablePropBase.position.set(0, 1.67, 4.5);
     tablePropBase.rotation.y = -Math.PI / 6;
