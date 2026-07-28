@@ -12,7 +12,7 @@ export const CardFlipView: React.FC = () => {
   const [cards, setCards] = useState<CustomCardState[]>(
     CARD_FLIP_ITEMS.map((item) => ({
       ...item,
-      isFlipped: false, // Initially false -> shows back_summer (title card)
+      isFlipped: false,
     }))
   );
 
@@ -137,8 +137,8 @@ export const CardFlipView: React.FC = () => {
         </div>
       )}
 
-      {/* Responsive Grid - 가로/세로 카드 혼용 대응 그리드 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-[1280px] justify-items-center perspective-1200 px-2">
+      {/* Responsive Grid: 6개 카드 모두 동일한 세로 비율 카드 프레임 유지 */}
+      <div className="grid grid-cols-2 md:grid-cols-6 lg:grid-cols-6 gap-2.5 sm:gap-3 lg:gap-3 xl:gap-4 w-full max-w-[1360px] justify-items-center perspective-1200 px-1">
         {cards.map((card) => {
           const frontUrl = card.customFrontUrl || card.frontImageUrl;
           const backUrl = card.customBackUrl || card.backImageUrl;
@@ -155,12 +155,8 @@ export const CardFlipView: React.FC = () => {
             <div
               key={card.id}
               onClick={() => toggleFlip(card.id)}
-              /* ⭐️ 가로 카드(Horizontal)인 경우 그리드 2칸 차지 및 비율 16/9 적용 */
-              className={`w-full perspective-1000 cursor-pointer select-none group ${
-                isHorizontal
-                  ? 'sm:col-span-2 aspect-[16/10] max-w-[420px]'
-                  : 'col-span-1 aspect-[2/3] max-w-[240px]'
-              }`}
+              /* ⭐️ 모든 카드 외관 크기는 동일하게 세로형(2/3) 고정 */
+              className="w-full max-w-[155px] sm:max-w-[170px] md:max-w-[150px] lg:max-w-[180px] xl:max-w-[200px] aspect-[2/3] perspective-1000 cursor-pointer select-none group"
               id={`card-${card.id}`}
             >
               <div
@@ -168,7 +164,7 @@ export const CardFlipView: React.FC = () => {
                   card.isFlipped ? 'rotate-y-180' : ''
                 }`}
               >
-                {/* DEFAULT FACE (back_summer title image) */}
+                {/* DEFAULT FACE (겉면: back_summer 세로 이미지) */}
                 <div className="absolute inset-0 rounded-none backface-hidden bg-[#18181B] border border-[#3F3F46] overflow-hidden flex flex-col group-hover:border-[#c084fc] transition-colors">
                   <div className="w-full h-full relative flex flex-col items-center justify-center p-2">
                     <img
@@ -181,7 +177,6 @@ export const CardFlipView: React.FC = () => {
                       }`}
                     />
 
-                    {/* Placeholder when backUrl is "image" or image fails to load */}
                     {isBackError && (
                       <div className="w-full h-full bg-[#18181B] border border-[#27272A] flex flex-col items-center justify-between p-2.5 sm:p-3 text-center">
                         <div className="w-full flex justify-between items-center text-[9px] sm:text-[10px] text-[#A1A1AA] font-mono uppercase">
@@ -232,20 +227,21 @@ export const CardFlipView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* FLIPPED FACE (The specific Photo) */}
-                <div className="absolute inset-0 rounded-none backface-hidden rotate-y-180 bg-[#121212] border border-[#c084fc] overflow-hidden flex flex-col">
-                  <div className="w-full h-full relative flex flex-col items-center justify-center p-2">
+                {/* FLIPPED FACE (뒤집었을 때 속면) */}
+                <div className="absolute inset-0 rounded-none backface-hidden rotate-y-180 bg-[#121212] border border-[#c084fc] overflow-hidden flex flex-col items-center justify-center">
+                  <div className="w-full h-full relative flex flex-col items-center justify-center p-2 overflow-hidden">
                     <img
                       src={frontUrl}
                       alt={card.title}
                       referrerPolicy="no-referrer"
                       onError={() => handleImageError(frontKey)}
-                      className={`w-full h-full object-cover absolute inset-0 ${
-                        isFrontError ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                      }`}
+                      /* ⭐️ 핵심: 가로 카드(isHorizontal)라면 90도 회전시켜 세로 프레임에 꽉 차게 변경!
+                         회전 대신 가로 비율대로 쏙 들어가길 원하시면 'rotate-90 object-cover' 대신 'object-contain'으로 쓰셔도 됩니다. */
+                      className={`w-full h-full absolute inset-0 ${
+                        isHorizontal ? 'rotate-90 object-cover scale-125' : 'object-cover'
+                      } ${isFrontError ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                     />
 
-                    {/* Placeholder when frontUrl is "image" or image fails to load */}
                     {isFrontError && (
                       <div className="w-full h-full bg-[#27272A] border border-[#3F3F46] flex flex-col items-center justify-between p-2.5 sm:p-3 text-center">
                         <div className="w-full flex justify-between items-center text-[9px] sm:text-[10px] text-[#A1A1AA] font-mono uppercase">
