@@ -2,7 +2,7 @@
 // Set frontImageUrl and backImageUrl to "image" as requested.
 // You can edit "image" with your image URL or relative path directly on GitHub!
 
-export const BACK_SUMMER_IMAGE = "/image/back_summer.png";
+export const BACK_SUMMER_IMAGE = "image/back_summer.png";
 
 export interface CardItemData {
   id: number;
@@ -17,42 +17,42 @@ export const CARD_FLIP_ITEMS: CardItemData[] = [
     id: 1,
     title: 'Summer Special #1',
     orientation: 'vertical',
-    frontImageUrl: '/image/front1_summer.png',
+    frontImageUrl: 'image/front1_summer.png',
     backImageUrl: BACK_SUMMER_IMAGE,
   },
   {
     id: 2,
     title: 'Summer Special #2',
     orientation: 'vertical',
-    frontImageUrl: '/image/front2_summer.png',
+    frontImageUrl: 'image/front2_summer.png',
     backImageUrl: BACK_SUMMER_IMAGE,
   },
   {
     id: 3,
     title: 'Summer Special #3',
     orientation: 'horizontal',
-    frontImageUrl: '/image/front3_summer.png',
+    frontImageUrl: 'image/front3_summer.png',
     backImageUrl: BACK_SUMMER_IMAGE,
   },
   {
     id: 4,
     title: 'Summer Special #4',
     orientation: 'horizontal',
-    frontImageUrl: '/image/front4_summer.png',
+    frontImageUrl: 'image/front4_summer.png',
     backImageUrl: BACK_SUMMER_IMAGE,
   },
   {
     id: 5,
     title: 'Summer Special #5',
     orientation: 'horizontal',
-    frontImageUrl: '/image/front5_summer.png',
+    frontImageUrl: 'image/front5_summer.png',
     backImageUrl: BACK_SUMMER_IMAGE,
   },
   {
     id: 6,
     title: 'Summer Special #6',
     orientation: 'horizontal',
-    frontImageUrl: '/image/front_summer.png',
+    frontImageUrl: 'image/front_summer.png',
     backImageUrl: BACK_SUMMER_IMAGE,
   },
 ];
