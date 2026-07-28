@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Paperlogy';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-7Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Paperlogy-Medium';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-5Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --font-paperlogy: 'Paperlogy', 'Paperlogy-Medium', sans-serif;
+}
+
+* {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body {
+  background-color: #0a0a0a;
+  color: #fafafa;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Apple SD Gothic Neo", 'Paperlogy', 'Paperlogy-Medium', sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* StudioBlank Focus Outline */
+button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid #a855f7;
+  outline-offset: 2px;
+}
+
+/* 3D Card Flip styles */
+.perspective-800 {
+  perspective: 800px;
+}
+
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+

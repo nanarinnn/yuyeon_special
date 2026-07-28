@@ -1,0 +1,6 @@
+{
+  "name": "YUYEON BIRTHDAY SPECIAL PAGE",
+  "description": "유연이 생일 기념 스페셜 웹페이지 (카드 뒤집기, 3D 미니룸 생일카페, 방명록)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
