@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+// ⭐️ 빌드 에러 원인 해결: .js 확장자 제거 및 경로 수정
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Camera, RotateCcw, Eye } from 'lucide-react';
 import { MINIROOM_IMAGES } from '../data/miniroomImages';
 
@@ -55,7 +56,7 @@ export const MiniroomView: React.FC = () => {
       }
     }
 
-    // 🎨 Color Config - 원래대로 예쁜 보라/분홍 톤 복구!
+    // Color Config
     const CONFIG = {
       wallColor: '#e8e0f0',
       floorColor: '#d8cce5',
@@ -80,14 +81,14 @@ export const MiniroomView: React.FC = () => {
     camera.position.set(0, 15, 17);
     cameraRef.current = camera;
 
-    // 3. Renderer Setup (빛 노출량 조정)
+    // 3. Renderer Setup
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.8; // ⭐️ 노출을 0.8로 낮춰 눈부심 감소
+    renderer.toneMappingExposure = 0.8;
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
@@ -160,7 +161,7 @@ export const MiniroomView: React.FC = () => {
       map: getTexture(MINIROOM_IMAGES.counterPlancard, 'COUNTER PLANCARD', 1024, 256, '#27272a'),
     });
 
-    // ⭐️ 아크릴 스탠드용 투명 재질 수정
+    // 아크릴 스탠드용 재질
     const tablePropMat = new THREE.MeshStandardMaterial({
       map: getTexture(MINIROOM_IMAGES.acrylicProp, 'ACRYLIC PROP', 256, 384, '#3f3f46'),
       transparent: true,
@@ -172,18 +173,18 @@ export const MiniroomView: React.FC = () => {
       map: getTexture(MINIROOM_IMAGES.signboard, 'SIGNBOARD', 512, 768, '#3f3f46'),
     });
 
-    // 6. Lighting - 조명 밝기만 깔끔하게 낮춤! 💡
-    const ambientLight = new THREE.AmbientLight('#e9d5ff', 0.35); // 0.6 -> 0.35 은은하게 낮춤
+    // 6. Lighting
+    const ambientLight = new THREE.AmbientLight('#e9d5ff', 0.35);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight('#ffffff', 0.6); // 1.0 -> 0.6 조명 밝기 낮춤
+    const mainLight = new THREE.DirectionalLight('#ffffff', 0.6);
     mainLight.position.set(5, 18, 10);
     mainLight.castShadow = true;
     mainLight.shadow.mapSize.width = 2048;
     mainLight.shadow.mapSize.height = 2048;
     scene.add(mainLight);
 
-    const pointLight = new THREE.PointLight('#c084fc', 0.7, 12); // 1.2 -> 0.7 포인트 조명 낮춤
+    const pointLight = new THREE.PointLight('#c084fc', 0.7, 12);
     pointLight.position.set(-3.5, 3.5, -2);
     scene.add(pointLight);
 
@@ -359,7 +360,7 @@ export const MiniroomView: React.FC = () => {
     signboardGroup.add(signBack);
     scene.add(signboardGroup);
 
-    // 15. Cup Holder Pyramid (180도 회전 유지)
+    // 15. Cup Holder Pyramid
     const cupHolderGeo = new THREE.CylinderGeometry(0.25, 0.18, 0.5, 16);
     const cupMaterials = [cupBodyMaterial, cupCapMaterial, cupCapMaterial];
     const pyramidPositions = [
@@ -513,6 +514,7 @@ export const MiniroomView: React.FC = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
+      controls.dispose();
       renderer.dispose();
     };
   }, []);
