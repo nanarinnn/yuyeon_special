@@ -69,7 +69,7 @@ export const CardFlipView: React.FC = () => {
           카드를 눌러보세요
         </h1>
         <p className="text-[11px] sm:text-xs text-[#A1A1AA] leading-normal break-keep max-w-md mx-auto">
-          코드 내 <code className="text-[#c084fc] bg-[#18181B] px-1 py-0.5 rounded font-mono">"image"</code> 표기 부분을 깃허브에서 실제 이미지 경로로 수정할 수 있습니다.
+          코드 내 <code className="text-[#c084fc] bg-[#18181B] px-1 py-0.5 rounded font-mono">"image"</code> YUYEON SPECIAL
         </p>
       </div>
 
