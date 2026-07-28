@@ -69,7 +69,7 @@ export const CardFlipView: React.FC = () => {
           카드를 눌러보세요
         </h1>
         <p className="text-[11px] sm:text-xs text-[#A1A1AA] leading-normal break-keep max-w-md mx-auto">
-          코드 내 <code className="text-[#c084fc] bg-[#18181B] px-1 py-0.5 rounded font-mono">"image"</code> YUYEON SPECIAL
+          YUYEON SPECIAL
         </p>
       </div>
 
@@ -234,7 +234,6 @@ export const CardFlipView: React.FC = () => {
                       alt={card.title}
                       referrerPolicy="no-referrer"
                       onError={() => handleImageError(frontKey)}
-                      /* ⭐️ 핵심: 3~6번 가로 이미지(isHorizontal)는 object-contain으로 세로 프레임 내에서 원본 가로 비율 유지! */
                       className={`w-full h-full absolute inset-0 ${
                         isHorizontal ? 'object-contain' : 'object-cover'
                       } ${isFrontError ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
@@ -300,8 +299,6 @@ export const CardFlipView: React.FC = () => {
           );
         })}
       </div>
-
-      <div className="mt-8 text-[11px] text-[#71717A] text-center font-mono uppercase tracking-wider max-w-lg break-keep px-2">
     </div>
   );
 };
