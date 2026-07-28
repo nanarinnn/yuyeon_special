@@ -4,36 +4,36 @@
 
 export const MINIROOM_IMAGES = {
   // Main hanging banner on back wall
-  mainBanner: "image",
+  mainBanner: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/banner.png",
 
   // Left wall vertical frame
-  verticalFrame: "image",
+  verticalFrame: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/birthday_2.png",
 
   // Left wall horizontal frame
-  horizontalFrame: "image",
+  horizontalFrame: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/birthday_1.png",
 
   // Left wall 6 photo gallery grid
   photoGallery: [
-    "image", // Photo #1
-    "image", // Photo #2
-    "image", // Photo #3
-    "image", // Photo #4
-    "image", // Photo #5
-    "image", // Photo #6
+    "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/vertial.jpg", // Photo #1
+    "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/study.jpg", // Photo #2
+    "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/kirakira.jpg", // Photo #3
+    "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/lavu.jpg", // Photo #4
+    "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/nai.jpg", // Photo #5
+    "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/hazu.jpg", // Photo #6
   ],
 
   // Counter front plancard banner
-  counterPlancard: "image",
+  counterPlancard: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/plancard.png",
 
   // Mini standing banner on counter
-  standingBanner: "image",
+  standingBanner: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/banner_stand.png",
 
   // Table acrylic stand prop
-  acrylicProp: "image",
+  acrylicProp: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/arc.png",
 
   // Entrance signboard stand
-  signboard: "image",
+  signboard: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/front.png",
 
   // Cup holder design texture
-  cupHolder: "image",
+  cupHolder: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/cupholder.png",
 };
