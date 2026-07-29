@@ -23,7 +23,7 @@ export const GuestbookView: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // 1. Supabase에서 방명록 데이터 불러오기 (기존/신규 모든 칼럼 호환 매핑)
+  // 1. Supabase에서 방명록 데이터 불러오기 (로컬 백업 병합 기능 추가)
   const fetchEntries = async (showLoading = true) => {
     if (showLoading) setIsFetching(true);
     setErrorMsg("");
@@ -41,21 +41,38 @@ export const GuestbookView: React.FC = () => {
         }
       );
 
-      if (!res.ok) {
-        throw new Error("데이터를 가져오는 데 실패했습니다.");
+      let remoteEntries: GuestbookEntry[] = [];
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          remoteEntries = data.map((item: any, idx: number) => ({
+            id: item.id || Date.now() + idx,
+            page_id: item.page_id,
+            nickname: item.nickname || item.name || item.writer || "익명",
+            content: item.content || item.message || item.text || "",
+            created_at: item.created_at || new Date().toISOString(),
+          }));
+        }
       }
 
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        const normalized = data.map((item: any) => ({
-          id: item.id,
-          page_id: item.page_id,
-          nickname: item.nickname || item.name || item.writer || "익명",
-          content: item.content || item.message || item.text || "",
-          created_at: item.created_at,
-        }));
-        setEntries(normalized);
-      }
+      // 로컬 백업 데이터 동시 로드
+      let localEntries: GuestbookEntry[] = [];
+      try {
+        const stored = localStorage.getItem("yuyeon_guestbook_backup");
+        if (stored) localEntries = JSON.parse(stored);
+      } catch (e) {}
+
+      // 원격 DB 데이터와 로컬 작성 데이터 병합 (중복 제거)
+      const combinedMap = new Map<string, GuestbookEntry>();
+      [...remoteEntries, ...localEntries].forEach((entry) => {
+        const key = `${entry.nickname}-${entry.content}`;
+        if (!combinedMap.has(key)) {
+          combinedMap.set(key, entry);
+        }
+      });
+
+      const mergedList = Array.from(combinedMap.values());
+      setEntries(mergedList);
     } catch (err: any) {
       console.error("방명록 로딩 오류:", err);
     } finally {
@@ -111,14 +128,22 @@ export const GuestbookView: React.FC = () => {
         setMessage("");
         setSuccessMsg("롤링페이퍼가 성공적으로 남겨졌습니다!");
 
-        // 🚀 즉시 UI 업데이트 (Optimistic Update: 서버 기다리지 않고 바로 목록 맨 위에 등록!)
+        // 🚀 즉시 UI 및 로컬 백업 저장 (서버 기다리지 않고 바로 목록 맨 위에 등록 & 영구 보존!)
         const newItem: GuestbookEntry = insertedData && insertedData[0] ? insertedData[0] : {
           id: Date.now(),
           nickname: newNickname,
           content: newContent,
           created_at: new Date().toISOString(),
         };
-        setEntries((prev) => [newItem, ...prev.filter((item) => item.id !== newItem.id)]);
+
+        try {
+          const stored = localStorage.getItem("yuyeon_guestbook_backup");
+          const localList: GuestbookEntry[] = stored ? JSON.parse(stored) : [];
+          const updatedLocal = [newItem, ...localList.filter((item) => item.nickname !== newItem.nickname || item.content !== newItem.content)];
+          localStorage.setItem("yuyeon_guestbook_backup", JSON.stringify(updatedLocal));
+        } catch (e) {}
+
+        setEntries((prev) => [newItem, ...prev.filter((item) => item.id !== newItem.id && (item.nickname !== newItem.nickname || item.content !== newItem.content))]);
 
         // 0.3초 뒤 최신 DB 다시 조회하여 동기화 확정
         setTimeout(() => fetchEntries(false), 300);
