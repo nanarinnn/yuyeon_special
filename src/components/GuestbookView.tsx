@@ -23,10 +23,15 @@ export const GuestbookView: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // 1. Supabase에서 방명록 데이터 불러오기 (최신순 정렬 + 실시간 일시 복원)
+  // 1. Supabase에서 방명록 데이터 불러오기 (Supabase DB 100% 동기화 전용)
   const fetchEntries = async (showLoading = true) => {
     if (showLoading) setIsFetching(true);
     try {
+      // 혹시 브라우저에 남아있을지 모르는 이전 백업 임시저장소 완전 삭제
+      try {
+        localStorage.removeItem("yuyeon_guestbook_backup");
+      } catch (e) {}
+
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/guestbook?select=*`,
         {
@@ -42,7 +47,6 @@ export const GuestbookView: React.FC = () => {
         const data = await res.json();
         if (Array.isArray(data)) {
           remoteEntries = data.map((item: any, idx: number) => {
-            // page_id(yuyeon_special_1785322980) 또는 created_at에서 실제 작성 일시 복원
             let timestamp: number = Date.now();
             if (item.page_id && item.page_id.startsWith("yuyeon_special_")) {
               const parsedTs = parseInt(item.page_id.replace("yuyeon_special_", ""), 10);
@@ -63,34 +67,14 @@ export const GuestbookView: React.FC = () => {
         }
       }
 
-      // 로컬 작성 데이터 병합
-      let localEntries: GuestbookEntry[] = [];
-      try {
-        const stored = localStorage.getItem("yuyeon_guestbook_backup");
-        if (stored) localEntries = JSON.parse(stored);
-      } catch (e) {}
-
-      const allList = [...remoteEntries, ...localEntries];
-      const result: GuestbookEntry[] = [];
-      const keys = new Set<string>();
-
-      for (const item of allList) {
-        if (!item.content) continue;
-        const k = `${item.nickname}:::${item.content}`;
-        if (!keys.has(k)) {
-          keys.add(k);
-          result.push(item);
-        }
-      }
-
-      // ⭐️ 최신 작성본이 제일 위로 오도록 내림차순 정렬
-      result.sort((a, b) => {
+      // 최신 작성본이 제일 위로 오도록 내림차순 정렬
+      remoteEntries.sort((a, b) => {
         const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
         const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
         return timeB - timeA;
       });
 
-      setEntries(result);
+      setEntries(remoteEntries);
     } catch (err: any) {
       console.error("방명록 로딩 오류:", err);
       setErrorMsg("방명록 데이터를 불러오는 중 오류가 발생했습니다.");
@@ -146,20 +130,12 @@ export const GuestbookView: React.FC = () => {
         setMessage("");
         setSuccessMsg("롤링페이퍼가 성공적으로 남겨졌습니다!");
 
-        // 🚀 즉시 UI 및 로컬 백업 저장 (서버 기다리지 않고 바로 목록 맨 위에 등록 & 영구 보존!)
         const newItem: GuestbookEntry = insertedData && insertedData[0] ? insertedData[0] : {
           id: Date.now(),
           nickname: newNickname,
           content: newContent,
           created_at: new Date().toISOString(),
         };
-
-        try {
-          const stored = localStorage.getItem("yuyeon_guestbook_backup");
-          const localList: GuestbookEntry[] = stored ? JSON.parse(stored) : [];
-          const updatedLocal = [newItem, ...localList.filter((item) => item.nickname !== newItem.nickname || item.content !== newItem.content)];
-          localStorage.setItem("yuyeon_guestbook_backup", JSON.stringify(updatedLocal));
-        } catch (e) {}
 
         setEntries((prev) => [newItem, ...prev.filter((item) => item.id !== newItem.id && (item.nickname !== newItem.nickname || item.content !== newItem.content))]);
 
@@ -316,15 +292,13 @@ export const GuestbookView: React.FC = () => {
                       </span>
                     </div>
                     <span className="text-[11px] text-[#b29cc2]">
-                      {item.created_at
-                        ? new Date(item.created_at).toLocaleDateString("ko-KR", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "최근 작성됨"}
+                      {new Date(item.created_at || Date.now()).toLocaleDateString("ko-KR", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                   </div>
                   <p className="text-[#e2d5f0] text-sm leading-relaxed whitespace-pre-wrap break-words pt-1">
