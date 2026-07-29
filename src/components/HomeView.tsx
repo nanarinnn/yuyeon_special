@@ -28,7 +28,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           className="w-full bg-[#1c142b] hover:bg-[#c084fc] hover:text-[#0e0817] hover:border-[#c084fc] text-[#f4f0ff] border border-[#523d75] py-4 px-6 rounded-none text-base font-bold tracking-wider transition-all duration-150 cursor-pointer text-center active:scale-[0.98]"
           id="btn-summerflip"
         >
-          유연이의 포토 아카이브
+          PHOTO FLIP
         </button>
 
         <button
@@ -36,7 +36,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           className="w-full bg-[#1c142b] hover:bg-[#c084fc] hover:text-[#0e0817] hover:border-[#c084fc] text-[#f4f0ff] border border-[#523d75] py-4 px-6 rounded-none text-base font-bold tracking-wider transition-all duration-150 cursor-pointer text-center active:scale-[0.98]"
           id="btn-miniroom"
         >
-          유연이 생일카페
+          BIRTHDAY CAFE
         </button>
 
         <button
@@ -44,7 +44,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           className="w-full bg-[#1c142b] hover:bg-[#c084fc] hover:text-[#0e0817] hover:border-[#c084fc] text-[#f4f0ff] border border-[#523d75] py-4 px-6 rounded-none text-base font-bold tracking-wider transition-all duration-150 cursor-pointer text-center active:scale-[0.98]"
           id="btn-visit"
         >
-          2026 유연이 생일기념 롤링페이퍼
+          ROLLING PAPER
         </button>
       </div>
 
