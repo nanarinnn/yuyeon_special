@@ -23,7 +23,7 @@ export const GuestbookView: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // 1. Supabase에서 방명록 데이터 불러오기 (캐시 방지 타임스탬프 적용)
+  // 1. Supabase에서 방명록 데이터 불러오기 (기존/신규 모든 칼럼 호환 매핑)
   const fetchEntries = async (showLoading = true) => {
     if (showLoading) setIsFetching(true);
     setErrorMsg("");
@@ -47,7 +47,14 @@ export const GuestbookView: React.FC = () => {
 
       const data = await res.json();
       if (Array.isArray(data)) {
-        setEntries(data);
+        const normalized = data.map((item: any) => ({
+          id: item.id,
+          page_id: item.page_id,
+          nickname: item.nickname || item.name || item.writer || "익명",
+          content: item.content || item.message || item.text || "",
+          created_at: item.created_at,
+        }));
+        setEntries(normalized);
       }
     } catch (err: any) {
       console.error("방명록 로딩 오류:", err);
