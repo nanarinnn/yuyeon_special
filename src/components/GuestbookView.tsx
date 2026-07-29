@@ -30,7 +30,7 @@ export const GuestbookView: React.FC = () => {
     try {
       const cacheBuster = new Date().getTime();
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/guestbook?select=*&order=created_at.desc&_t=${cacheBuster}`,
+        `${SUPABASE_URL}/rest/v1/guestbook?select=*&_t=${cacheBuster}`,
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
