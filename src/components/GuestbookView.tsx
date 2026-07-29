@@ -43,10 +43,15 @@ export const GuestbookView: React.FC = () => {
       }
 
       const data = await res.json();
-      setEntries(data);
+      if (Array.isArray(data)) {
+        setEntries(data);
+      } else {
+        setEntries([]);
+      }
     } catch (err: any) {
       console.error("방명록 로딩 오류:", err);
-      setErrorMsg("방명록을 불러오는 중 오류가 발생했습니다.");
+      // 단순 로딩 오류 메시지 대신 콘솔 로그 및 초기화
+      setEntries([]);
     } finally {
       setIsFetching(false);
     }
@@ -217,9 +222,9 @@ export const GuestbookView: React.FC = () => {
             </div>
           ) : entries.length === 0 ? (
             <div className="text-center py-16 border border-[#523d75] bg-[#1c142b] text-[#d8b4fe] space-y-2 p-6">
-              <MessageSquare className="w-8 h-8 mx-auto text-[#7d678f] mb-2" />
-              <p className="text-sm font-semibold text-[#f4f0ff]">작성된 롤링페이퍼가 없습니다.</p>
-              <p className="text-xs text-[#9d8ba6]">첫 번째 메시지를 기록해 보세요.</p>
+              <MessageSquare className="w-8 h-8 mx-auto text-[#c084fc] mb-2" />
+              <p className="text-base font-bold text-[#f4f0ff]">아직 작성된 메시지가 없어요!</p>
+              <p className="text-xs text-[#d8b4fe]">첫 번째 축하 메시지의 주인공이 되어보세요 (●'◡'●)</p>
             </div>
           ) : (
             entries.map((item, idx) => {
