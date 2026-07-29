@@ -11,7 +11,7 @@ const VIEW_TITLES: Record<ActiveView, string> = {
   home: '',
   summerflip: 'CARD FLIP ARCHIVE',
   miniroom: '유연이 생일카페',
-  visit: '2026 진유연 생일기념 롤링페이퍼',
+  visit: '2026 유연이 생일기념 롤링페이퍼',
 };
 
 export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigateHome }) => {

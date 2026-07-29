@@ -164,7 +164,7 @@ export const GuestbookView: React.FC = () => {
             ROLLING PAPER ARCHIVE
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#f4f0ff] uppercase">
-            2026 진유연 생일기념 롤링페이퍼
+            2026 유연이 생일기념 롤링페이퍼
           </h1>
           <p className="text-[#d8b4fe] text-xs sm:text-sm tracking-wide max-w-md mx-auto">
             유연이에게 응원과 축하의 메시지를 남겨주세요! (●'◡'●)
