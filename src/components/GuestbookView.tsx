@@ -23,17 +23,20 @@ export const GuestbookView: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // 1. Supabase에서 방명록 데이터 불러오기
-  const fetchEntries = async () => {
-    setIsFetching(true);
+  // 1. Supabase에서 방명록 데이터 불러오기 (캐시 방지 타임스탬프 적용)
+  const fetchEntries = async (showLoading = true) => {
+    if (showLoading) setIsFetching(true);
     setErrorMsg("");
     try {
+      const cacheBuster = new Date().getTime();
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/guestbook?select=*&order=created_at.desc`,
+        `${SUPABASE_URL}/rest/v1/guestbook?select=*&order=created_at.desc&_t=${cacheBuster}`,
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
           },
         }
       );
@@ -45,29 +48,33 @@ export const GuestbookView: React.FC = () => {
       const data = await res.json();
       if (Array.isArray(data)) {
         setEntries(data);
-      } else {
-        setEntries([]);
       }
     } catch (err: any) {
       console.error("방명록 로딩 오류:", err);
-      // 단순 로딩 오류 메시지 대신 콘솔 로그 및 초기화
-      setEntries([]);
     } finally {
-      setIsFetching(false);
+      if (showLoading) setIsFetching(false);
     }
   };
 
+  // 실시간 5초 동기화 타이머 설정 (다른 사용자가 남긴 글 자동 갱신)
   useEffect(() => {
-    fetchEntries();
+    fetchEntries(true);
+    const interval = setInterval(() => {
+      fetchEntries(false);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  // 2. Supabase로 새 방명록 작성하기 (기존 Supabase 테이블 컬럼: nickname, content, page_id 연동)
+  // 2. Supabase로 새 방명록 작성하기 (즉시 상태 반영 + 즉시 새로고침)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !message.trim()) {
       setErrorMsg("이름과 작성 내용을 모두 입력해 주세요.");
       return;
     }
+
+    const newNickname = name.trim();
+    const newContent = message.trim();
 
     setLoading(true);
     setErrorMsg("");
@@ -83,17 +90,29 @@ export const GuestbookView: React.FC = () => {
           Prefer: "return=representation",
         },
         body: JSON.stringify({
-          nickname: name.trim(),
-          content: message.trim(),
+          nickname: newNickname,
+          content: newContent,
           page_id: "yuyeon_special",
         }),
       });
 
       if (res.ok) {
+        const insertedData = await res.json();
         setName("");
         setMessage("");
-        setSuccessMsg("방명록이 성공적으로 남겨졌습니다!");
-        fetchEntries(); // 새 글 등록 후 목록 갱신
+        setSuccessMsg("롤링페이퍼가 성공적으로 남겨졌습니다!");
+
+        // 🚀 즉시 UI 업데이트 (Optimistic Update: 서버 기다리지 않고 바로 목록 맨 위에 등록!)
+        const newItem: GuestbookEntry = insertedData && insertedData[0] ? insertedData[0] : {
+          id: Date.now(),
+          nickname: newNickname,
+          content: newContent,
+          created_at: new Date().toISOString(),
+        };
+        setEntries((prev) => [newItem, ...prev.filter((item) => item.id !== newItem.id)]);
+
+        // 0.3초 뒤 최신 DB 다시 조회하여 동기화 확정
+        setTimeout(() => fetchEntries(false), 300);
         setTimeout(() => setSuccessMsg(""), 4000);
       } else {
         const errData = await res.json();
