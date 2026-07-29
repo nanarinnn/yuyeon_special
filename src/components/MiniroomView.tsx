@@ -519,11 +519,11 @@ export const MiniroomView: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#FAFAFA] flex flex-col items-center justify-start pt-20 sm:pt-24 pb-16 px-3 sm:px-6">
       {/* Title */}
-      <div className="text-center mb-6 max-w-xl px-2">
-        <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c084fc] mb-1 font-bold">
+      <div className="text-center mb-6 max-w-xl px-2 flex flex-col items-center gap-3">
+        <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c084fc] font-bold">
           3D INTERACTIVE SPACE
         </div>
-        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-[#f4f0ff] mb-2">
+        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-[#f4f0ff]">
           유연이 생일카페
         </h1>
         <p className="text-xs sm:text-sm text-[#d8b4fe] leading-normal break-keep">

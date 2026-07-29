@@ -61,11 +61,11 @@ export const CardFlipView: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#FAFAFA] flex flex-col items-center justify-start pt-20 sm:pt-24 pb-16 px-2 sm:px-6 select-none">
       {/* Header section */}
-      <div className="text-center mb-6 sm:mb-8 max-w-2xl px-2">
-        <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c084fc] mb-1 font-bold">
+      <div className="text-center mb-6 sm:mb-8 max-w-2xl px-2 flex flex-col items-center gap-3">
+        <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c084fc] font-bold">
           SUMMER SPECIAL ARCHIVE
         </div>
-        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-[#f4f0ff] mb-2">
+        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-[#f4f0ff]">
           카드를 클릭해보세요!
         </h1>
         <p className="text-xs sm:text-sm text-[#d8b4fe] leading-normal break-keep max-w-md mx-auto">

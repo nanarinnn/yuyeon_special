@@ -9,11 +9,11 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
   return (
     <div className="min-h-screen bg-[#120d1c] text-[#f4f0ff] flex flex-col items-center justify-center p-6 sm:p-12 select-none">
       {/* Header Container */}
-      <div className="text-center mb-16 max-w-xl">
-        <div className="text-xs uppercase tracking-[0.25em] text-[#c084fc] mb-4 font-bold">
+      <div className="text-center mb-12 max-w-xl flex flex-col items-center gap-3">
+        <div className="text-xs uppercase tracking-[0.25em] text-[#c084fc] font-bold">
           SPECIAL ARCHIVE
         </div>
-        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#f4f0ff] leading-tight mb-4">
+        <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#f4f0ff] leading-tight">
           YUYEON BIRTHDAY<br />SPECIAL ARCHIVE
         </h1>
         <div className="text-[#d8b4fe] text-sm sm:text-base font-normal tracking-wide">

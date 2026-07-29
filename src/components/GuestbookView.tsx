@@ -112,7 +112,7 @@ export const GuestbookView: React.FC = () => {
       <div className="max-w-2xl mx-auto space-y-10">
         
         {/* Header Section */}
-        <div className="text-center space-y-3 pt-6">
+        <div className="text-center flex flex-col items-center gap-3 pt-6">
           <div className="text-xs uppercase tracking-[0.25em] text-[#c084fc] font-bold">
             ROLLING PAPER ARCHIVE
           </div>
