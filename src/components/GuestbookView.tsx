@@ -26,16 +26,13 @@ export const GuestbookView: React.FC = () => {
   // 1. Supabase에서 방명록 데이터 불러오기
   const fetchEntries = async (showLoading = true) => {
     if (showLoading) setIsFetching(true);
-    setErrorMsg("");
     try {
-      const cacheBuster = Date.now();
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/guestbook?select=*&_t=${cacheBuster}`,
+        `${SUPABASE_URL}/rest/v1/guestbook?select=*`,
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-            "Cache-Control": "no-cache",
           },
         }
       );
@@ -43,7 +40,7 @@ export const GuestbookView: React.FC = () => {
       let remoteEntries: GuestbookEntry[] = [];
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           remoteEntries = data.map((item: any, idx: number) => ({
             id: item.id || idx + 1,
             page_id: item.page_id || "yuyeon_special",
@@ -52,6 +49,8 @@ export const GuestbookView: React.FC = () => {
             created_at: item.created_at || new Date().toISOString(),
           }));
         }
+      } else {
+        console.error("Supabase API 응답 실패:", res.status);
       }
 
       // 로컬 작성 데이터 병합
@@ -62,20 +61,22 @@ export const GuestbookView: React.FC = () => {
       } catch (e) {}
 
       const allList = [...remoteEntries, ...localEntries];
-      const uniqueList: GuestbookEntry[] = [];
-      const seen = new Set<string>();
+      const result: GuestbookEntry[] = [];
+      const keys = new Set<string>();
 
       for (const item of allList) {
-        const key = `${item.nickname}_${item.content}`;
-        if (item.content && !seen.has(key)) {
-          seen.add(key);
-          uniqueList.push(item);
+        if (!item.content) continue;
+        const k = `${item.nickname}:::${item.content}`;
+        if (!keys.has(k)) {
+          keys.add(k);
+          result.push(item);
         }
       }
 
-      setEntries(uniqueList);
+      setEntries(result);
     } catch (err: any) {
       console.error("방명록 로딩 오류:", err);
+      setErrorMsg("방명록 데이터를 불러오는 중 오류가 발생했습니다.");
     } finally {
       if (showLoading) setIsFetching(false);
     }
