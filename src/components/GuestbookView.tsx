@@ -23,7 +23,7 @@ export const GuestbookView: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // 1. Supabase에서 방명록 데이터 불러오기
+  // 1. Supabase에서 방명록 데이터 불러오기 (최신순 정렬 + 실시간 일시 복원)
   const fetchEntries = async (showLoading = true) => {
     if (showLoading) setIsFetching(true);
     try {
@@ -41,16 +41,26 @@ export const GuestbookView: React.FC = () => {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          remoteEntries = data.map((item: any, idx: number) => ({
-            id: item.id || idx + 1,
-            page_id: item.page_id || "yuyeon_special",
-            nickname: item.nickname || item.name || item.writer || "익명",
-            content: item.content || item.message || item.text || "",
-            created_at: item.created_at || new Date().toISOString(),
-          }));
+          remoteEntries = data.map((item: any, idx: number) => {
+            // page_id(yuyeon_special_1785322980) 또는 created_at에서 실제 작성 일시 복원
+            let timestamp: number = Date.now();
+            if (item.page_id && item.page_id.startsWith("yuyeon_special_")) {
+              const parsedTs = parseInt(item.page_id.replace("yuyeon_special_", ""), 10);
+              if (!isNaN(parsedTs)) timestamp = parsedTs;
+            } else if (item.created_at) {
+              const parsedDate = new Date(item.created_at).getTime();
+              if (!isNaN(parsedDate)) timestamp = parsedDate;
+            }
+
+            return {
+              id: item.id || timestamp + idx,
+              page_id: item.page_id || "yuyeon_special",
+              nickname: item.nickname || item.name || item.writer || "익명",
+              content: item.content || item.message || item.text || "",
+              created_at: new Date(timestamp).toISOString(),
+            };
+          });
         }
-      } else {
-        console.error("Supabase API 응답 실패:", res.status);
       }
 
       // 로컬 작성 데이터 병합
@@ -72,6 +82,13 @@ export const GuestbookView: React.FC = () => {
           result.push(item);
         }
       }
+
+      // ⭐️ 최신 작성본이 제일 위로 오도록 내림차순 정렬
+      result.sort((a, b) => {
+        const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return timeB - timeA;
+      });
 
       setEntries(result);
     } catch (err: any) {
