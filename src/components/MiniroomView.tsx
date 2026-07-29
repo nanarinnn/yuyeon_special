@@ -67,9 +67,9 @@ export const MiniroomView: React.FC = () => {
       cupHolderColor: '#d88be6',
     };
 
-    // 1. Scene Setup
+    // 1. Scene Setup (딥 퍼플-블랙 #120d1c ➔ 화사한 파스텔 연보라 방 구조물이 가장 선명하고 예쁘게 대비되도록 배치!)
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#f0e6f7'); // 전체 배경도 밝고 화사하게 설정
+    scene.background = new THREE.Color('#120d1c');
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(
