@@ -56,20 +56,20 @@ export const MiniroomView: React.FC = () => {
       }
     }
 
-    // Color Config (밝은 파스텔 연보라 + 화사한 퍼플 톤)
+    // Color Config (훨씬 더 맑고 밝은 연보라 + 화이트 퍼플 톤)
     const CONFIG = {
-      wallColor: '#c8b6e2',
-      floorColor: '#b8a4d9',
-      counterColor: '#7b52ab',
-      counterTopColor: '#4a2c73',
+      wallColor: '#e9e0f5', // 매우 화사하고 맑은 연보라 벽면
+      floorColor: '#d6c7eb', // 바닥면 밝기 업
+      counterColor: '#9b72cf', // 카운터 브라이트 퍼플
+      counterTopColor: '#6a439c',
       tableColor: '#ffffff',
-      chairColor: '#e0b0ff',
-      cupHolderColor: '#b055f7',
+      chairColor: '#f0d6ff',
+      cupHolderColor: '#c084fc',
     };
 
     // 1. Scene Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#25183d'); // 훨씬 밝은 퍼플-블랙 배경
+    scene.background = new THREE.Color('#38235a'); // 밝은 바이올렛 스카이 배경
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(

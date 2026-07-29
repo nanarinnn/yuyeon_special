@@ -1,22 +1,21 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: 'ChosunGulim';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/ChosunGulim.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
   font-family: 'Paperlogy';
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-7Bold.woff2') format('woff2');
   font-weight: 700;
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Paperlogy-Medium';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-5Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
 :root {
-  --font-chosun: 'ChosunGulim', sans-serif;
+  --font-paperlogy: 'Paperlogy', 'Paperlogy-Medium', sans-serif;
 }
 
 * {
@@ -27,7 +26,7 @@
 body {
   background-color: #120d1c;
   color: #f4f0ff;
-  font-family: 'ChosunGulim', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  font-family: 'Paperlogy', 'Paperlogy-Medium', -apple-system, BlinkMacSystemFont, sans-serif;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
