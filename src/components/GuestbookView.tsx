@@ -23,20 +23,19 @@ export const GuestbookView: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // 1. Supabase에서 방명록 데이터 불러오기 (로컬 백업 병합 기능 추가)
+  // 1. Supabase에서 방명록 데이터 불러오기
   const fetchEntries = async (showLoading = true) => {
     if (showLoading) setIsFetching(true);
     setErrorMsg("");
     try {
-      const cacheBuster = new Date().getTime();
+      const cacheBuster = Date.now();
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/guestbook?select=*&_t=${cacheBuster}`,
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
+            "Cache-Control": "no-cache",
           },
         }
       );
@@ -44,10 +43,10 @@ export const GuestbookView: React.FC = () => {
       let remoteEntries: GuestbookEntry[] = [];
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           remoteEntries = data.map((item: any, idx: number) => ({
-            id: item.id || Date.now() + idx,
-            page_id: item.page_id,
+            id: item.id || idx + 1,
+            page_id: item.page_id || "yuyeon_special",
             nickname: item.nickname || item.name || item.writer || "익명",
             content: item.content || item.message || item.text || "",
             created_at: item.created_at || new Date().toISOString(),
@@ -55,24 +54,26 @@ export const GuestbookView: React.FC = () => {
         }
       }
 
-      // 로컬 백업 데이터 동시 로드
+      // 로컬 작성 데이터 병합
       let localEntries: GuestbookEntry[] = [];
       try {
         const stored = localStorage.getItem("yuyeon_guestbook_backup");
         if (stored) localEntries = JSON.parse(stored);
       } catch (e) {}
 
-      // 원격 DB 데이터와 로컬 작성 데이터 병합 (중복 제거)
-      const combinedMap = new Map<string, GuestbookEntry>();
-      [...remoteEntries, ...localEntries].forEach((entry) => {
-        const key = `${entry.nickname}-${entry.content}`;
-        if (!combinedMap.has(key)) {
-          combinedMap.set(key, entry);
-        }
-      });
+      const allList = [...remoteEntries, ...localEntries];
+      const uniqueList: GuestbookEntry[] = [];
+      const seen = new Set<string>();
 
-      const mergedList = Array.from(combinedMap.values());
-      setEntries(mergedList);
+      for (const item of allList) {
+        const key = `${item.nickname}_${item.content}`;
+        if (item.content && !seen.has(key)) {
+          seen.add(key);
+          uniqueList.push(item);
+        }
+      }
+
+      setEntries(uniqueList);
     } catch (err: any) {
       console.error("방명록 로딩 오류:", err);
     } finally {
