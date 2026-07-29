@@ -56,11 +56,11 @@ export const MiniroomView: React.FC = () => {
       }
     }
 
-    // Color Config (보내주신 색상 칩과 100% 동일한 3배 더 밝고 화사한 핑크-라벤더 퍼플)
+    // Color Config (빛 반응 없는 100% 순수 밝은 파스텔 연보라 & 핑크 색상)
     const CONFIG = {
-      wallColor: '#d8b2db', // 첨부해주신 첫 번째 샘플 칩과 정확히 일치하는 화사한 라벤더-핑크 (#d8b2db)
-      floorColor: '#ebd8f2', // 첨부해주신 두 번째 샘플 칩과 정확히 일치하는 아주 맑고 밝은 핑크-라벤더 (#ebd8f2)
-      counterColor: '#b87cc2', // 카운터 3배 맑고 화사한 라이트 핑크 퍼플
+      wallColor: '#d8b2db', // 첨부해주신 첫 번째 샘플 칩과 100% 동일한 연보라-핑크
+      floorColor: '#ebd8f2', // 첨부해주신 두 번째 샘플 칩과 100% 동일한 아주 맑은 핑크-라벤더
+      counterColor: '#b87cc2', // 카운터 맑은 팝 퍼플
       counterTopColor: '#9656a3',
       tableColor: '#ffffff',
       chairColor: '#e5c0ee',
@@ -69,7 +69,7 @@ export const MiniroomView: React.FC = () => {
 
     // 1. Scene Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#7a4f8f'); // 훨씬 더 화사하고 밝은 핑크-바이올렛 배경
+    scene.background = new THREE.Color('#f0e6f7'); // 전체 배경도 밝고 화사하게 설정
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(
@@ -81,12 +81,11 @@ export const MiniroomView: React.FC = () => {
     camera.position.set(0, 15, 17);
     cameraRef.current = camera;
 
-    // 3. Renderer Setup (NoToneMapping 적용으로 이미지 원본 색상 그대로 선명하게 표출!)
+    // 3. Renderer Setup (빛 음영 감쇄 완전 제거)
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.enabled = false; // 그림자 및 광원 음영 제거
     renderer.toneMapping = THREE.NoToneMapping;
 
     container.innerHTML = '';
@@ -102,45 +101,34 @@ export const MiniroomView: React.FC = () => {
     controls.target.set(0, 1.5, 0);
     controlsRef.current = controls;
 
-    // 5. Materials
-    const floorMaterial = new THREE.MeshStandardMaterial({
+    // 5. Materials (MeshBasicMaterial 사용 ➔ 3D 빛/그림자 영향 없이 설정한 '색상 그대로' 100% 맑게 표출!)
+    const floorMaterial = new THREE.MeshBasicMaterial({
       color: CONFIG.floorColor,
-      roughness: 0.6,
     });
-    const wallMaterial = new THREE.MeshStandardMaterial({
+    const wallMaterial = new THREE.MeshBasicMaterial({
       color: CONFIG.wallColor,
-      roughness: 0.7,
     });
-    const counterMaterial = new THREE.MeshStandardMaterial({
+    const counterMaterial = new THREE.MeshBasicMaterial({
       color: CONFIG.counterColor,
-      roughness: 0.5,
-      metalness: 0.1,
     });
-    const counterTopMat = new THREE.MeshStandardMaterial({
+    const counterTopMat = new THREE.MeshBasicMaterial({
       color: CONFIG.counterTopColor,
-      roughness: 0.3,
     });
-    const tableMaterial = new THREE.MeshStandardMaterial({
+    const tableMaterial = new THREE.MeshBasicMaterial({
       color: CONFIG.tableColor,
-      roughness: 0.3,
     });
-    const chairMaterial = new THREE.MeshStandardMaterial({
+    const chairMaterial = new THREE.MeshBasicMaterial({
       color: CONFIG.chairColor,
-      roughness: 0.4,
     });
-    const metalMat = new THREE.MeshStandardMaterial({
+    const metalMat = new THREE.MeshBasicMaterial({
       color: 0xd4d4d8,
-      metalness: 0.8,
-      roughness: 0.1,
     });
 
-    const cupBodyMaterial = new THREE.MeshStandardMaterial({
+    const cupBodyMaterial = new THREE.MeshBasicMaterial({
       map: getTexture(MINIROOM_IMAGES.cupHolder, 'CUP', 256, 256, '#3f3f46'),
-      roughness: 0.3,
     });
-    const cupCapMaterial = new THREE.MeshStandardMaterial({
+    const cupCapMaterial = new THREE.MeshBasicMaterial({
       color: CONFIG.cupHolderColor,
-      roughness: 0.3,
     });
 
     // ⭐️ Banners & Frames (MeshBasicMaterial + 원본 그대로 100% 선명도)
@@ -179,21 +167,6 @@ export const MiniroomView: React.FC = () => {
       map: getTexture(MINIROOM_IMAGES.signboard, 'SIGNBOARD', 512, 768, '#3f3f46'),
       color: imgToneColor,
     });
-
-    // 6. Lighting - 더욱 밝고 맑은 라이팅 환경
-    const ambientLight = new THREE.AmbientLight('#ffffff', 0.95);
-    scene.add(ambientLight);
-
-    const mainLight = new THREE.DirectionalLight('#ffffff', 0.85);
-    mainLight.position.set(5, 18, 10);
-    mainLight.castShadow = true;
-    mainLight.shadow.mapSize.width = 2048;
-    mainLight.shadow.mapSize.height = 2048;
-    scene.add(mainLight);
-
-    const pointLight = new THREE.PointLight('#e9d5ff', 1.0, 20);
-    pointLight.position.set(-3.5, 3.5, -2);
-    scene.add(pointLight);
 
     // 7. Room Structure
     const floorGeo = new THREE.BoxGeometry(14, 0.2, 14);
