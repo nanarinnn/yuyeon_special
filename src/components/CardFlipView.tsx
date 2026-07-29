@@ -65,11 +65,11 @@ export const CardFlipView: React.FC = () => {
         <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#c084fc] mb-1 font-bold">
           SUMMER SPECIAL ARCHIVE
         </div>
-        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-[#FAFAFA] mb-2">
-          카드를 눌러보세요
+        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-[#f4f0ff] mb-2">
+          카드를 클릭해보세요!
         </h1>
-        <p className="text-[11px] sm:text-xs text-[#A1A1AA] leading-normal break-keep max-w-md mx-auto">
-          YUYEON SPECIAL
+        <p className="text-xs sm:text-sm text-[#d8b4fe] leading-normal break-keep max-w-md mx-auto">
+          YUYEON CARD SPECIAL (❁´◡`❁)
         </p>
       </div>
 

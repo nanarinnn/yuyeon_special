@@ -36,7 +36,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
           className="w-full bg-[#1c142b] hover:bg-[#c084fc] hover:text-[#0e0817] hover:border-[#c084fc] text-[#f4f0ff] border border-[#523d75] py-4 px-6 rounded-none text-base font-bold tracking-wider transition-all duration-150 cursor-pointer text-center active:scale-[0.98]"
           id="btn-miniroom"
         >
-          생일카페
+          유연이 생일카페
         </button>
 
         <button

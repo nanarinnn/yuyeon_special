@@ -10,7 +10,7 @@ interface NavbarProps {
 const VIEW_TITLES: Record<ActiveView, string> = {
   home: '',
   summerflip: 'CARD FLIP ARCHIVE',
-  miniroom: '생일카페',
+  miniroom: '유연이 생일카페',
   visit: '2026 진유연 생일기념 롤링페이퍼',
 };
 
