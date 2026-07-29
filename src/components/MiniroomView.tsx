@@ -56,20 +56,20 @@ export const MiniroomView: React.FC = () => {
       }
     }
 
-    // Color Config (두 번째 이미지 스크린샷과 동일한 은은하고 예쁜 파스텔 라벤더 & 퍼플)
+    // Color Config (보내주신 색상 칩과 100% 동일한 3배 더 밝고 화사한 핑크-라벤더 퍼플)
     const CONFIG = {
-      wallColor: '#d6cbdf', // 은은한 라벤더-퍼플 벽면
-      floorColor: '#e3d8eb', // 바닥면 라벤더 톤
-      counterColor: '#5c387e', // 딥 라벤더 퍼플 카운터
-      counterTopColor: '#3c2057',
-      tableColor: '#f4eff9',
-      chairColor: '#d9c2e8',
-      cupHolderColor: '#a855f7',
+      wallColor: '#d8b2db', // 첨부해주신 첫 번째 샘플 칩과 정확히 일치하는 화사한 라벤더-핑크 (#d8b2db)
+      floorColor: '#ebd8f2', // 첨부해주신 두 번째 샘플 칩과 정확히 일치하는 아주 맑고 밝은 핑크-라벤더 (#ebd8f2)
+      counterColor: '#b87cc2', // 카운터 3배 맑고 화사한 라이트 핑크 퍼플
+      counterTopColor: '#9656a3',
+      tableColor: '#ffffff',
+      chairColor: '#e5c0ee',
+      cupHolderColor: '#d88be6',
     };
 
     // 1. Scene Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#1c112b'); // 차분하고 고급스러운 딥 바이올렛 배경
+    scene.background = new THREE.Color('#7a4f8f'); // 훨씬 더 화사하고 밝은 핑크-바이올렛 배경
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(
