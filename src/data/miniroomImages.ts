@@ -29,7 +29,7 @@ export const MINIROOM_IMAGES = {
   standingBanner: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/banner_stand.png",
 
   // Table acrylic stand prop
-  acrylicProp: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/arc.png",
+  acrylicProp: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/acr.png",
 
   // Entrance signboard stand
   signboard: "https://raw.githubusercontent.com/nanarinnn/yuyeon_special/main/image/front.png",
