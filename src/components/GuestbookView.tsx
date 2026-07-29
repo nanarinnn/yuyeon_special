@@ -107,6 +107,7 @@ export const GuestbookView: React.FC = () => {
     setSuccessMsg("");
 
     try {
+      const uniquePageId = `yuyeon_special_${Date.now()}`;
       const res = await fetch(`${SUPABASE_URL}/rest/v1/guestbook`, {
         method: "POST",
         headers: {
@@ -118,7 +119,7 @@ export const GuestbookView: React.FC = () => {
         body: JSON.stringify({
           nickname: newNickname,
           content: newContent,
-          page_id: "yuyeon_special",
+          page_id: uniquePageId,
         }),
       });
 
