@@ -115,9 +115,7 @@ export const GuestbookView: React.FC = () => {
         },
         body: JSON.stringify({
           nickname: newNickname,
-          name: newNickname,
           content: newContent,
-          message: newContent,
           page_id: "yuyeon_special",
         }),
       });
