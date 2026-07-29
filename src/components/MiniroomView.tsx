@@ -39,36 +39,37 @@ export const MiniroomView: React.FC = () => {
       return texture;
     }
 
-    // Load Texture helper
+    // Load Texture helper (sRGB encoding applied for 100% true vibrant colors)
     const textureLoader = new THREE.TextureLoader();
     function getTexture(imageUrl: string, fallbackLabel: string, width = 512, height = 512, bgColor = '#3f3f46') {
       if (!imageUrl || imageUrl === 'image') {
         return createGrayTexture(`${fallbackLabel}`, width, height, bgColor);
       }
       try {
-        const tex = textureLoader.load(imageUrl, undefined, undefined, () => {
-          console.warn(`Failed to load texture ${imageUrl}, using fallback.`);
+        const tex = textureLoader.load(imageUrl, (t) => {
+          t.colorSpace = THREE.SRGBColorSpace;
         });
+        tex.colorSpace = THREE.SRGBColorSpace;
         return tex;
       } catch {
         return createGrayTexture(`${fallbackLabel}`, width, height, bgColor);
       }
     }
 
-    // Color Config
+    // Color Config (밝은 파스텔 연보라 + 화사한 퍼플 톤)
     const CONFIG = {
-      wallColor: '#e8e0f0',
-      floorColor: '#d8cce5',
-      counterColor: '#5c3d75',
-      counterTopColor: '#3a224c',
+      wallColor: '#c8b6e2',
+      floorColor: '#b8a4d9',
+      counterColor: '#7b52ab',
+      counterTopColor: '#4a2c73',
       tableColor: '#ffffff',
-      chairColor: '#d1a3d1',
-      cupHolderColor: '#a855f7',
+      chairColor: '#e0b0ff',
+      cupHolderColor: '#b055f7',
     };
 
     // 1. Scene Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#120c1f');
+    scene.background = new THREE.Color('#25183d'); // 훨씬 밝은 퍼플-블랙 배경
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(
@@ -80,14 +81,13 @@ export const MiniroomView: React.FC = () => {
     camera.position.set(0, 15, 17);
     cameraRef.current = camera;
 
-    // 3. Renderer Setup
+    // 3. Renderer Setup (NoToneMapping 적용으로 이미지 원본 색상 그대로 선명하게 표출!)
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.85;
+    renderer.toneMapping = THREE.NoToneMapping;
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
@@ -105,46 +105,46 @@ export const MiniroomView: React.FC = () => {
     // 5. Materials
     const floorMaterial = new THREE.MeshStandardMaterial({
       color: CONFIG.floorColor,
-      roughness: 0.8,
+      roughness: 0.6,
     });
     const wallMaterial = new THREE.MeshStandardMaterial({
       color: CONFIG.wallColor,
-      roughness: 0.9,
+      roughness: 0.7,
     });
     const counterMaterial = new THREE.MeshStandardMaterial({
       color: CONFIG.counterColor,
-      roughness: 0.6,
+      roughness: 0.5,
       metalness: 0.1,
     });
     const counterTopMat = new THREE.MeshStandardMaterial({
       color: CONFIG.counterTopColor,
-      roughness: 0.4,
+      roughness: 0.3,
     });
     const tableMaterial = new THREE.MeshStandardMaterial({
       color: CONFIG.tableColor,
-      roughness: 0.4,
+      roughness: 0.3,
     });
     const chairMaterial = new THREE.MeshStandardMaterial({
       color: CONFIG.chairColor,
-      roughness: 0.5,
+      roughness: 0.4,
     });
     const metalMat = new THREE.MeshStandardMaterial({
-      color: 0xa1a1aa,
-      metalness: 0.9,
+      color: 0xd4d4d8,
+      metalness: 0.8,
       roughness: 0.1,
     });
 
     const cupBodyMaterial = new THREE.MeshStandardMaterial({
       map: getTexture(MINIROOM_IMAGES.cupHolder, 'CUP', 256, 256, '#3f3f46'),
-      roughness: 0.4,
+      roughness: 0.3,
     });
     const cupCapMaterial = new THREE.MeshStandardMaterial({
       color: CONFIG.cupHolderColor,
-      roughness: 0.4,
+      roughness: 0.3,
     });
 
-    // ⭐️ Banners & Frames (이미지 자체 밝기를 90% 수준으로 조정: color 0xe6e6e6)
-    const imgToneColor = 0xe6e6e6;
+    // ⭐️ Banners & Frames (MeshBasicMaterial + 원본 그대로 100% 선명도)
+    const imgToneColor = 0xffffff;
 
     const bannerMaterial = new THREE.MeshBasicMaterial({
       map: getTexture(MINIROOM_IMAGES.mainBanner, 'MAIN BANNER', 1024, 512, '#3f3f46'),
@@ -168,11 +168,11 @@ export const MiniroomView: React.FC = () => {
     });
 
     // 아크릴 스탠드용 재질
-const tablePropMat = new THREE.MeshBasicMaterial({
-  map: getTexture(MINIROOM_IMAGES.acrylicProp, 'ACRYLIC PROP', 256, 384, '#3f3f46'),
-  transparent: true,
-  alphaTest: 0.5, // 0.5보다 투명한 영역은 잘라내서 깔끔하게 띄움!
-  side: THREE.DoubleSide,
+    const tablePropMat = new THREE.MeshBasicMaterial({
+      map: getTexture(MINIROOM_IMAGES.acrylicProp, 'ACRYLIC PROP', 256, 384, '#3f3f46'),
+      transparent: true,
+      alphaTest: 0.5,
+      side: THREE.DoubleSide,
     });
 
     const signboardMat = new THREE.MeshBasicMaterial({
@@ -180,18 +180,18 @@ const tablePropMat = new THREE.MeshBasicMaterial({
       color: imgToneColor,
     });
 
-    // 6. Lighting - 조명 밝기 30% 증가 💡
-    const ambientLight = new THREE.AmbientLight('#e9d5ff', 0.455); // 0.35 -> 0.455 (+30%)
+    // 6. Lighting - 더욱 밝고 맑은 라이팅 환경
+    const ambientLight = new THREE.AmbientLight('#ffffff', 0.95);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight('#ffffff', 0.78); // 0.6 -> 0.78 (+30%)
+    const mainLight = new THREE.DirectionalLight('#ffffff', 0.85);
     mainLight.position.set(5, 18, 10);
     mainLight.castShadow = true;
     mainLight.shadow.mapSize.width = 2048;
     mainLight.shadow.mapSize.height = 2048;
     scene.add(mainLight);
 
-    const pointLight = new THREE.PointLight('#c084fc', 0.91, 12); // 0.7 -> 0.91 (+30%)
+    const pointLight = new THREE.PointLight('#e9d5ff', 1.0, 20);
     pointLight.position.set(-3.5, 3.5, -2);
     scene.add(pointLight);
 

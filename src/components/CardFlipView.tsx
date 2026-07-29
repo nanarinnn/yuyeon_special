@@ -137,8 +137,8 @@ export const CardFlipView: React.FC = () => {
         </div>
       )}
 
-      {/* Responsive Grid: 1~6번 카드 프레임 완벽 동일 */}
-      <div className="grid grid-cols-2 md:grid-cols-6 lg:grid-cols-6 gap-2.5 sm:gap-3 lg:gap-3 xl:gap-4 w-full max-w-[1360px] justify-items-center perspective-1200 px-1">
+      {/* Responsive Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-6 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-4 xl:gap-5 w-full max-w-[1360px] justify-items-center perspective-1200 px-1">
         {cards.map((card) => {
           const frontUrl = card.customFrontUrl || card.frontImageUrl;
           const backUrl = card.customBackUrl || card.backImageUrl;
@@ -159,138 +159,58 @@ export const CardFlipView: React.FC = () => {
               id={`card-${card.id}`}
             >
               <div
-                className={`w-full h-full relative preserve-3d transition-transform duration-600 ease-in-out shadow-md group-hover:shadow-[0_0_15px_rgba(192,132,252,0.4)] ${
+                className={`w-full h-full relative preserve-3d transition-transform duration-600 ease-in-out rounded-2xl ${
                   card.isFlipped ? 'rotate-y-180' : ''
                 }`}
               >
                 {/* DEFAULT FACE (겉면: back_summer) */}
-                <div className="absolute inset-0 rounded-none backface-hidden bg-[#18181B] border border-[#3F3F46] overflow-hidden flex flex-col group-hover:border-[#c084fc] transition-colors">
-                  <div className="w-full h-full relative flex flex-col items-center justify-center p-2">
+                <div className="absolute inset-0 rounded-2xl backface-hidden bg-[#1c142b] border border-[#523d75] overflow-hidden flex flex-col group-hover:border-[#c084fc] transition-colors shadow-lg">
+                  <div className="w-full h-full relative flex flex-col items-center justify-center">
                     <img
                       src={backUrl}
                       alt="Back Summer Title"
                       referrerPolicy="no-referrer"
                       onError={() => handleImageError(backKey)}
-                      className={`w-full h-full object-cover absolute inset-0 ${
+                      className={`w-full h-full object-cover absolute inset-0 rounded-2xl ${
                         isBackError ? 'opacity-0 pointer-events-none' : 'opacity-100'
                       }`}
                     />
 
                     {isBackError && (
-                      <div className="w-full h-full bg-[#18181B] border border-[#27272A] flex flex-col items-center justify-between p-2.5 sm:p-3 text-center">
-                        <div className="w-full flex justify-between items-center text-[9px] sm:text-[10px] text-[#A1A1AA] font-mono uppercase">
-                          <span>0{card.id}</span>
-                          <button
-                            onClick={(e) => openUrlModal(e, card)}
-                            title="이미지 URL 설정"
-                            className="hover:text-white p-0.5"
-                          >
-                            <Link2 className="w-3 h-3 text-[#c084fc]" />
-                          </button>
+                      <div className="w-full h-full bg-[#1c142b] border border-[#523d75] rounded-2xl flex flex-col items-center justify-center p-3 text-center">
+                        <div className="w-8 h-8 sm:w-9 sm:h-9 border border-[#523d75] bg-[#120d1c] flex items-center justify-center mb-2">
+                          <ImageIcon className="w-4 h-4 text-[#c084fc]" />
                         </div>
-                        <div className="my-auto flex flex-col items-center">
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 border border-[#3F3F46] bg-[#0A0A0A] flex items-center justify-center mb-1.5 sm:mb-2">
-                            <ImageIcon className="w-4 h-4 text-[#c084fc]" />
-                          </div>
-                          <div className="text-[10px] sm:text-xs font-bold tracking-wider text-[#FAFAFA] mb-1 uppercase truncate max-w-[120px]">
-                            BACK_SUMMER
-                          </div>
-                          <div className="text-[9px] sm:text-[10px] font-mono text-[#c084fc] bg-[#0A0A0A] px-1.5 py-0.5 border border-[#3F3F46]">
-                            "image"
-                          </div>
-                        </div>
-                        <div className="text-[9px] text-[#A1A1AA] font-mono flex items-center gap-1 whitespace-nowrap">
-                          <RotateCw className="w-2.5 h-2.5 text-[#c084fc] shrink-0" />
-                          <span>터치하여 뒤집기</span>
+                        <div className="text-xs font-bold text-[#f4f0ff] mb-1">
+                          CARD #{card.id}
                         </div>
                       </div>
-                    )}
-
-                    {!isBackError && (
-                      <>
-                        <div className="absolute top-2 right-2 z-10">
-                          <button
-                            onClick={(e) => openUrlModal(e, card)}
-                            title="이미지 URL 변경"
-                            className="bg-black/60 hover:bg-black text-[#A1A1AA] hover:text-white p-1 transition-colors border border-white/20"
-                          >
-                            <Link2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                        <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-black/70 backdrop-blur-md border border-[#c084fc]/40 text-[9px] font-bold text-[#fafafa] flex items-center gap-1 uppercase tracking-wider whitespace-nowrap">
-                          <RotateCw className="w-2.5 h-2.5 text-[#c084fc]" />
-                          <span>터치하여 뒤집기</span>
-                        </div>
-                      </>
                     )}
                   </div>
                 </div>
 
                 {/* FLIPPED FACE (속면: 뒤집었을 때) */}
-                <div className="absolute inset-0 rounded-none backface-hidden rotate-y-180 bg-[#121212] border border-[#c084fc] overflow-hidden flex flex-col items-center justify-center">
-                  <div className="w-full h-full relative flex flex-col items-center justify-center p-1 bg-[#121212]">
+                <div className="absolute inset-0 rounded-2xl backface-hidden rotate-y-180 bg-[#1c142b] border border-[#c084fc] overflow-hidden flex flex-col items-center justify-center shadow-xl">
+                  <div className="w-full h-full relative flex flex-col items-center justify-center bg-[#1c142b] rounded-2xl">
                     <img
                       src={frontUrl}
                       alt={card.title}
                       referrerPolicy="no-referrer"
                       onError={() => handleImageError(frontKey)}
-                      className={`w-full h-full absolute inset-0 ${
+                      className={`w-full h-full absolute inset-0 rounded-2xl ${
                         isHorizontal ? 'object-contain' : 'object-cover'
                       } ${isFrontError ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                     />
 
                     {isFrontError && (
-                      <div className="w-full h-full bg-[#27272A] border border-[#3F3F46] flex flex-col items-center justify-between p-2.5 sm:p-3 text-center">
-                        <div className="w-full flex justify-between items-center text-[9px] sm:text-[10px] text-[#A1A1AA] font-mono uppercase">
-                          <span>0{card.id}</span>
-                          <button
-                            onClick={(e) => openUrlModal(e, card)}
-                            title="이미지 URL 설정"
-                            className="hover:text-white p-0.5"
-                          >
-                            <Link2 className="w-3 h-3 text-[#c084fc]" />
-                          </button>
+                      <div className="w-full h-full bg-[#1c142b] border border-[#523d75] rounded-2xl flex flex-col items-center justify-center p-3 text-center">
+                        <div className="w-8 h-8 sm:w-9 sm:h-9 border border-[#523d75] bg-[#120d1c] flex items-center justify-center mb-2">
+                          <ImageIcon className="w-4 h-4 text-[#c084fc]" />
                         </div>
-                        <div className="my-auto flex flex-col items-center">
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 border border-[#52525B] bg-[#18181B] flex items-center justify-center mb-1.5 sm:mb-2">
-                            <ImageIcon className="w-4 h-4 text-[#c084fc]" />
-                          </div>
-                          <div className="font-bold text-[10px] sm:text-xs text-[#FAFAFA] tracking-wider uppercase mb-1 truncate max-w-[120px]">
-                            PHOTO #{card.id}
-                          </div>
-                          <div className="text-[9px] sm:text-[10px] font-mono text-[#c084fc] bg-[#18181B] px-1.5 py-0.5 border border-[#3F3F46]">
-                            "image"
-                          </div>
+                        <div className="text-xs font-bold text-[#f4f0ff] mb-1">
+                          PHOTO #{card.id}
                         </div>
-                        <button
-                          onClick={(e) => openUrlModal(e, card)}
-                          className="text-[9px] text-[#FAFAFA] underline hover:text-[#c084fc] whitespace-nowrap"
-                        >
-                          이미지 URL 입력
-                        </button>
                       </div>
-                    )}
-
-                    {!isFrontError && (
-                      <>
-                        <div className="absolute top-2 right-2 z-10 flex gap-1">
-                          <button
-                            onClick={(e) => openUrlModal(e, card)}
-                            title="이미지 URL 변경"
-                            className="bg-black/70 hover:bg-black text-white p-1 transition-colors border border-white/20"
-                          >
-                            <Link2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-2 pt-4 text-left">
-                          <div className="text-[9px] text-[#c084fc] font-mono font-bold tracking-widest uppercase">
-                            PHOTO #0{card.id}
-                          </div>
-                          <div className="text-[10px] sm:text-xs font-bold text-white truncate">
-                            {card.title}
-                          </div>
-                        </div>
-                      </>
                     )}
                   </div>
                 </div>

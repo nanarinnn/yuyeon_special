@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Send, MessageSquare, User, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
 
 // Supabase 접속 정보 (REST API 직접 연동)
 const SUPABASE_URL = "https://tuqwintstnimajksseir.supabase.co";
@@ -7,8 +8,9 @@ const SUPABASE_ANON_KEY =
 
 interface GuestbookEntry {
   id?: number;
-  name: string;
-  message: string;
+  page_id?: string;
+  nickname: string;
+  content: string;
   created_at?: string;
 }
 
@@ -17,10 +19,14 @@ export const GuestbookView: React.FC = () => {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   // 1. Supabase에서 방명록 데이터 불러오기
   const fetchEntries = async () => {
+    setIsFetching(true);
+    setErrorMsg("");
     try {
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/guestbook?select=*&order=created_at.desc`,
@@ -41,6 +47,8 @@ export const GuestbookView: React.FC = () => {
     } catch (err: any) {
       console.error("방명록 로딩 오류:", err);
       setErrorMsg("방명록을 불러오는 중 오류가 발생했습니다.");
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -48,16 +56,17 @@ export const GuestbookView: React.FC = () => {
     fetchEntries();
   }, []);
 
-  // 2. Supabase로 새 방명록 작성하기
+  // 2. Supabase로 새 방명록 작성하기 (기존 Supabase 테이블 컬럼: nickname, content, page_id 연동)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !message.trim()) {
-      alert("이름과 작성 내용을 모두 입력해주세요.");
+      setErrorMsg("이름과 작성 내용을 모두 입력해 주세요.");
       return;
     }
 
     setLoading(true);
     setErrorMsg("");
+    setSuccessMsg("");
 
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/guestbook`, {
@@ -69,102 +78,187 @@ export const GuestbookView: React.FC = () => {
           Prefer: "return=representation",
         },
         body: JSON.stringify({
-          name: name.trim(),
-          message: message.trim(),
+          nickname: name.trim(),
+          content: message.trim(),
+          page_id: "yuyeon_special",
         }),
       });
 
       if (res.ok) {
         setName("");
         setMessage("");
+        setSuccessMsg("방명록이 성공적으로 남겨졌습니다!");
         fetchEntries(); // 새 글 등록 후 목록 갱신
+        setTimeout(() => setSuccessMsg(""), 4000);
       } else {
         const errData = await res.json();
-        alert(`방명록 등록 실패: ${errData.message || "오류가 발생했습니다."}`);
+        setErrorMsg(`방명록 등록 실패: ${errData.message || "오류가 발생했습니다."}`);
       }
     } catch (err: any) {
       console.error("방명록 작성 오류:", err);
-      alert("방명록 작성 중 오류가 발생했습니다.");
+      setErrorMsg("방명록 작성 중 네트워크 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-        📖 방명록
-      </h2>
-
-      {/* 작성 폼 */}
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <div>
-          <input
-            type="text"
-            placeholder="이름 (닉네임)"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            maxLength={20}
-          />
-        </div>
-        <div>
-          <textarea
-            placeholder="남기실 말씀을 적어주세요..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={3}
-            className="w-full p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
-        >
-          {loading ? "등록하는 중..." : "방명록 남기기"}
-        </button>
-      </form>
-
-      {/* 오류 메시지 표시 */}
-      {errorMsg && (
-        <p className="text-red-500 text-sm text-center">{errorMsg}</p>
-      )}
-
-      {/* 방명록 목록 */}
-      <div className="space-y-3">
-        {entries.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            아직 작성된 방명록이 없습니다. 첫 마디를 남겨보세요!
+    <div className="min-h-screen bg-[#120d1c] text-[#f4f0ff] pt-16 pb-20 px-4 sm:px-8 select-none">
+      <div className="max-w-2xl mx-auto space-y-10">
+        
+        {/* Header Section */}
+        <div className="text-center space-y-3 pt-6">
+          <div className="text-xs uppercase tracking-[0.25em] text-[#c084fc] font-bold">
+            ROLLING PAPER ARCHIVE
           </div>
-        ) : (
-          entries.map((item) => (
-            <div
-              key={item.id || item.created_at}
-              className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-2"
-            >
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  {item.name}
-                </span>
-                <span className="text-xs text-gray-400">
-                  {item.created_at
-                    ? new Date(item.created_at).toLocaleDateString("ko-KR", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : ""}
-                </span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#f4f0ff] uppercase">
+            2026 진유연 생일기념 롤링페이퍼
+          </h1>
+          <p className="text-[#d8b4fe] text-xs sm:text-sm tracking-wide max-w-md mx-auto">
+            유연이에게 응원과 축하의 메시지를 남겨주세요! (●'◡'●)
+          </p>
+        </div>
+
+        {/* Form Card (Purple-Black Design with Higher Contrast & Brightness) */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-[#1c142b] border border-[#523d75] p-5 sm:p-8 rounded-none space-y-5 shadow-lg shadow-purple-950/20"
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold tracking-widest text-[#d8b4fe] uppercase mb-2">
+                WRITER NAME / 닉네임
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#9d8ba6]">
+                  <User className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="이름 또는 닉네임을 입력하세요"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-[#120d1c] border border-[#523d75] text-[#f4f0ff] placeholder-[#7d678f] rounded-none text-sm focus:outline-none focus:border-[#c084fc] transition-colors"
+                  maxLength={20}
+                />
               </div>
-              <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap">
-                {item.message}
-              </p>
             </div>
-          ))
+
+            <div>
+              <label className="block text-[11px] font-bold tracking-widest text-[#d8b4fe] uppercase mb-2">
+                MESSAGE / 남기실 말씀
+              </label>
+              <textarea
+                placeholder="축하와 응원의 메시지를 자유롭게 남겨주세요..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={4}
+                className="w-full p-3.5 bg-[#120d1c] border border-[#523d75] text-[#f4f0ff] placeholder-[#7d678f] rounded-none text-sm focus:outline-none focus:border-[#c084fc] transition-colors resize-none"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#2a1b42] hover:bg-[#c084fc] hover:text-[#0e0817] hover:border-[#c084fc] text-[#f4f0ff] border border-[#6b4c9a] py-3.5 px-6 rounded-none text-sm font-bold tracking-wider uppercase transition-all duration-150 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
+          >
+            {loading ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>등록 진행 중...</span>
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                <span>롤링페이퍼 남기기</span>
+              </>
+            )}
+          </button>
+        </form>
+
+        {/* State Alerts */}
+        {errorMsg && (
+          <div className="p-4 bg-[#1c142b] border border-red-500/50 text-red-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
         )}
+
+        {successMsg && (
+          <div className="p-4 bg-[#1c142b] border border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+
+        {/* Guestbook List Header */}
+        <div className="flex items-center justify-between border-b border-[#3b2d54] pb-3 pt-2">
+          <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-[#f4f0ff] uppercase">
+            <MessageSquare className="w-4 h-4 text-[#c084fc]" />
+            <span>MESSAGES ({entries.length})</span>
+          </div>
+          <button
+            onClick={fetchEntries}
+            disabled={isFetching}
+            className="flex items-center gap-1.5 text-xs text-[#d8b4fe] hover:text-[#c084fc] transition-colors cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin text-[#c084fc]" : ""}`} />
+            <span>새로고침</span>
+          </button>
+        </div>
+
+        {/* Guestbook Entries List */}
+        <div className="space-y-4">
+          {isFetching && entries.length === 0 ? (
+            <div className="text-center py-16 text-[#9d8ba6] space-y-2">
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto text-[#c084fc]" />
+              <p className="text-xs tracking-widest uppercase">LOADING MESSAGES...</p>
+            </div>
+          ) : entries.length === 0 ? (
+            <div className="text-center py-16 border border-[#523d75] bg-[#1c142b] text-[#d8b4fe] space-y-2 p-6">
+              <MessageSquare className="w-8 h-8 mx-auto text-[#7d678f] mb-2" />
+              <p className="text-sm font-semibold text-[#f4f0ff]">작성된 롤링페이퍼가 없습니다.</p>
+              <p className="text-xs text-[#9d8ba6]">첫 번째 메시지를 기록해 보세요.</p>
+            </div>
+          ) : (
+            entries.map((item, idx) => {
+              const displayName = item.nickname || (item as any).name || "익명";
+              const displayContent = item.content || (item as any).message || "";
+              return (
+                <div
+                  key={item.id || `${item.created_at}-${idx}`}
+                  className="p-5 bg-[#1c142b] border border-[#523d75] hover:border-[#6b4c9a] rounded-none transition-colors space-y-3 shadow-sm"
+                >
+                  <div className="flex justify-between items-center border-b border-[#3b2d54] pb-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 bg-[#2e1d47] border border-[#6b4c9a] text-[#e9d5ff] flex items-center justify-center text-xs font-bold">
+                        {displayName.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-bold text-sm text-[#f4f0ff]">
+                        {displayName}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-[#b29cc2]">
+                      {item.created_at
+                        ? new Date(item.created_at).toLocaleDateString("ko-KR", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : ""}
+                    </span>
+                  </div>
+                  <p className="text-[#e2d5f0] text-sm leading-relaxed whitespace-pre-wrap break-words pt-1">
+                    {displayContent}
+                  </p>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );

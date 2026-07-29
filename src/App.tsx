@@ -14,7 +14,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e12] text-white font-sans selection:bg-[#6c5ce7] selection:text-white">
+    <div className="min-h-screen bg-[#120d1c] text-[#f4f0ff] font-sans selection:bg-[#9d4edd] selection:text-white">
       {/* Top Navbar Back Button */}
       <Navbar currentView={currentView} onNavigateHome={handleNavigateHome} />
 
