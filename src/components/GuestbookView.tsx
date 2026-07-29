@@ -260,7 +260,7 @@ export const GuestbookView: React.FC = () => {
               const displayContent = item.content || (item as any).message || "";
               return (
                 <div
-                  key={item.id || `${item.created_at}-${idx}`}
+                  key={item.id ? `gb-id-${item.id}` : `gb-idx-${idx}`}
                   className="p-5 bg-[#1c142b] border border-[#523d75] hover:border-[#6b4c9a] rounded-none transition-colors space-y-3 shadow-sm"
                 >
                   <div className="flex justify-between items-center border-b border-[#3b2d54] pb-2.5">
@@ -281,7 +281,7 @@ export const GuestbookView: React.FC = () => {
                             hour: "2-digit",
                             minute: "2-digit",
                           })
-                        : ""}
+                        : "최근 작성됨"}
                     </span>
                   </div>
                   <p className="text-[#e2d5f0] text-sm leading-relaxed whitespace-pre-wrap break-words pt-1">
