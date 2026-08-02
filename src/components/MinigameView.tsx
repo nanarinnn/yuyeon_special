@@ -784,15 +784,15 @@ export const MinigameView: React.FC = () => {
         </div>
       </div>
 
-      {/* Top HUD UI - 9개 전체 알파벳 수집 현황 */}
-      <div className="w-full max-w-[800px] bg-[#1c142b] border border-[#523d75] p-3 mb-3 flex items-center justify-between text-xs sm:text-sm font-bold">
-        <div className="flex items-center gap-2 text-[#fbbf24]">
-          <span>수집 현황 ({collectedCount}/9):</span>
-          <div className="flex items-center gap-1 bg-[#2a1b40] px-2 py-1 border border-[#6b4c9a]">
+      {/* Top HUD UI - 9개 전체 알파벳 수집 현황 (모바일 완전 반응형 최적화) */}
+      <div className="w-full max-w-[800px] bg-[#1c142b] border border-[#523d75] p-2.5 sm:p-3 mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm font-bold">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-[#fbbf24] overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none">
+          <span className="shrink-0 text-[11px] sm:text-xs">수집({collectedCount}/9):</span>
+          <div className="flex items-center gap-0.5 sm:gap-1 bg-[#2a1b40] p-1 border border-[#6b4c9a] shrink-0">
             {['H', 'A', 'P', 'P', 'Y', 'B', 'D', 'A', 'Y'].map((char, idx) => (
               <span
                 key={idx}
-                className={`px-1.5 py-0.5 rounded font-black font-mono text-sm transition-all ${
+                className={`px-1 sm:px-1.5 py-0.5 rounded font-black font-mono text-xs sm:text-sm transition-all ${
                   collectedSlots[idx]
                     ? 'bg-[#fbbf24] text-[#7c2d12] shadow-[0_0_8px_#fbbf24]'
                     : 'text-[#523d75] bg-[#190f2b]'
@@ -804,12 +804,12 @@ export const MinigameView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between sm:justify-end gap-3 text-xs shrink-0 pt-1 sm:pt-0 border-t border-[#3b2a57] sm:border-t-0">
           <div className="text-[#c084fc]">
-            남은 시간: <span className="text-[#f4f0ff] font-mono">{timer}s</span>
+            시간: <span className="text-[#f4f0ff] font-mono font-bold text-sm">{timer}s</span>
           </div>
           <div className="text-[#a855f7]">
-            점수: <span className="text-[#f4f0ff] font-mono">{score}</span>
+            점수: <span className="text-[#f4f0ff] font-mono font-bold text-sm">{score}</span>
           </div>
         </div>
       </div>
