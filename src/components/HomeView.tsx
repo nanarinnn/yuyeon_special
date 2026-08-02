@@ -57,7 +57,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
       </div>
 
       {/* Minimal Footer Stamp */}
-      <div className="absolute bottom-8 text-[11px] uppercase tracking-[0.2em] text-[#9d8ba6]">
+      <div className="mt-12 text-[11px] uppercase tracking-[0.2em] text-[#9d8ba6] text-center">
         YUYEON 2026
       </div>
     </div>
