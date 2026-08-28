@@ -24,7 +24,6 @@ export const Guestbook2026View: React.FC = () => {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          // 최신 작성본이 위로 가도록 정렬
           data.sort((a, b) => {
             const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
             const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
@@ -35,11 +34,12 @@ export const Guestbook2026View: React.FC = () => {
           setErrorMsg("데이터 형식이 올바르지 않습니다.");
         }
       } else {
-        setErrorMsg("2026년 데이터를 불러오지 못했습니다.");
+        const errJson = await res.json().catch(() => ({}));
+        setErrorMsg(errJson.error || `서버 에러: ${res.status} ${res.statusText}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("2026 롤링페이퍼 로드 오류:", err);
-      setErrorMsg("네트워크 오류가 발생했습니다.");
+      setErrorMsg(`네트워크 오류가 발생했습니다: ${err.message || err}`);
     } finally {
       setIsFetching(false);
     }

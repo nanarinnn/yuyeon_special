@@ -182,8 +182,19 @@ app.get("/api/gcs/rolling-paper-2026", async (req, res) => {
     const keyPath = path.join(process.cwd(), "gcs-key.json");
     const bucketName = "yuyeon-private-bucket"; // ⭐️ GCS 버킷 이름
 
+    let storage;
     if (fs.existsSync(keyPath)) {
-      const storage = new Storage({ keyFilename: keyPath });
+      storage = new Storage({ keyFilename: keyPath });
+    } else if (process.env.GCS_PRIVATE_KEY_JSON) {
+      try {
+        const credentials = JSON.parse(process.env.GCS_PRIVATE_KEY_JSON);
+        storage = new Storage({ credentials });
+      } catch (parseErr) {
+        console.error("GCS Environment Key JSON Parse Error:", parseErr);
+      }
+    }
+
+    if (storage) {
       const bucket = storage.bucket(bucketName);
       const file = bucket.file("rolling_paper_2026.json");
 
