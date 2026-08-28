@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/assets/**",
+      "src": "dist/**",
       "use": "@vercel/static"
     },
     {
@@ -29,7 +29,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "dist/index.html"
+      "dest": "dist/$1"
     }
   ]
 }
