@@ -1,4 +1,4 @@
-export type ActiveView = 'home' | 'summerflip' | 'miniroom' | 'visit' | 'minigame';
+export type ActiveView = 'home' | 'summerflip' | 'miniroom' | 'visit' | 'minigame' | 'visit2026' | 'devnotes';
 
 export interface GuestbookMessage {
   id?: string;

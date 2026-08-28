@@ -16,9 +16,6 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#f4f0ff] leading-tight">
           YUYEON BIRTHDAY<br />SPECIAL ARCHIVE
         </h1>
-        <div className="text-[#d8b4fe] text-sm sm:text-base font-normal tracking-wide">
-          2026 진유연 생일 기념 스페셜 아카이브
-        </div>
       </div>
 
       {/* Navigation Buttons - StudioBlank Primary Buttons */}
@@ -48,17 +45,33 @@ export const HomeView: React.FC<HomeViewProps> = ({ onNavigate }) => {
         </button>
 
         <button
+          onClick={() => onNavigate('visit2026')}
+          className="w-full bg-[#1c142b] hover:bg-[#c084fc] hover:text-[#0e0817] hover:border-[#c084fc] text-[#f4f0ff] border border-[#523d75] py-4 px-6 rounded-none text-base font-bold tracking-wider transition-all duration-150 cursor-pointer text-center active:scale-[0.98]"
+          id="btn-visit2026"
+        >
+          2026 ROLLING PAPER
+        </button>
+
+        <button
           onClick={() => onNavigate('visit')}
           className="w-full bg-[#1c142b] hover:bg-[#c084fc] hover:text-[#0e0817] hover:border-[#c084fc] text-[#f4f0ff] border border-[#523d75] py-4 px-6 rounded-none text-base font-bold tracking-wider transition-all duration-150 cursor-pointer text-center active:scale-[0.98]"
           id="btn-visit"
         >
-          ROLLING PAPER
+          2027 ROLLING PAPER
         </button>
       </div>
 
-      {/* Minimal Footer Stamp */}
-      <div className="mt-12 text-[11px] uppercase tracking-[0.2em] text-[#9d8ba6] text-center">
-        YUYEON 2026
+      {/* Developer Notes & Minimal Footer Stamp (Small and subtle) */}
+      <div className="mt-12 flex flex-col items-center gap-2">
+        <button
+          onClick={() => onNavigate('devnotes')}
+          className="text-[10px] tracking-widest text-[#c084fc]/70 hover:text-[#c084fc] uppercase underline decoration-dotted transition-colors cursor-pointer"
+        >
+          Developer Notes / 개발자 노트
+        </button>
+        <div className="text-[11px] uppercase tracking-[0.2em] text-[#9d8ba6] text-center">
+          YUYEON 2026
+        </div>
       </div>
     </div>
   );

@@ -173,6 +173,52 @@ Use markdown formatting with key bullet points, concise technical badges, and ac
   }
 });
 
+// 4. Google Cloud Storage Proxy Endpoint (Secure Private Data Retrieval)
+app.get("/api/gcs/rolling-paper-2026", async (req, res) => {
+  try {
+    const { Storage } = await import("@google-cloud/storage");
+    const fs = await import("fs");
+
+    const keyPath = path.join(process.cwd(), "gcs-key.json");
+    const bucketName = "yuyeon-private-bucket"; // ⭐️ GCS 버킷 이름
+
+    if (fs.existsSync(keyPath)) {
+      const storage = new Storage({ keyFilename: keyPath });
+      const bucket = storage.bucket(bucketName);
+      const file = bucket.file("rolling_paper_2026.json");
+
+      const [exists] = await file.exists();
+      if (exists) {
+        const [content] = await file.download();
+        res.setHeader("Content-Type", "application/json");
+        return res.send(content.toString());
+      }
+    }
+    
+    // GCS 연동 실패나 키가 없을 시 로컬 폴더 백업본 폴백 반환
+    const fallbackPath = path.join(process.cwd(), "public", "rolling_paper_2026.json");
+    if (fs.existsSync(fallbackPath)) {
+      const content = fs.readFileSync(fallbackPath, "utf-8");
+      res.setHeader("Content-Type", "application/json");
+      return res.send(content);
+    }
+
+    res.status(404).json({ error: "2026 롤링페이퍼 데이터를 찾을 수 없습니다." });
+  } catch (err: any) {
+    console.error("GCS Proxy Error:", err);
+    try {
+      const fs = await import("fs");
+      const fallbackPath = path.join(process.cwd(), "public", "rolling_paper_2026.json");
+      if (fs.existsSync(fallbackPath)) {
+        const content = fs.readFileSync(fallbackPath, "utf-8");
+        res.setHeader("Content-Type", "application/json");
+        return res.send(content);
+      }
+    } catch (e) {}
+    res.status(500).json({ error: "GCS 데이터를 로드하는 중 서버 내부 오류가 발생했습니다." });
+  }
+});
+
 // Vite Middleware for development / static serving for production
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {

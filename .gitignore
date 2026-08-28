@@ -6,3 +6,9 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Security Credentials
+gcs-key.json
+
+# Local Private Data
+public/rolling_paper_2026.json
