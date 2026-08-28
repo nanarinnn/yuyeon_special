@@ -243,14 +243,14 @@ async function startServer() {
       console.log(`Server running on http://0.0.0.0:${PORT}`);
     });
   } else {
-    // Vercel Serverless 환경에서는 app.listen을 돌릴 필요 없이 모듈만 export하면 됩니다.
-    // 만약 Vercel이 아닌 일반 Node.js 호스팅 환경인 경우 listen 실행
+    // Vercel Serverless 환경 및 일반 Node.js 호스팅 환경 모두에서 dist 정적 파일 서빙 활성화
+    const distPath = path.join(process.cwd(), "dist");
+    app.use(express.static(distPath));
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+
     if (!process.env.VERCEL) {
-      const distPath = path.join(process.cwd(), "dist");
-      app.use(express.static(distPath));
-      app.get("*", (req, res) => {
-        res.sendFile(path.join(distPath, "index.html"));
-      });
       app.listen(PORT, "0.0.0.0", () => {
         console.log(`Server running on http://0.0.0.0:${PORT}`);
       });
