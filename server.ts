@@ -238,17 +238,26 @@ async function startServer() {
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+    
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://0.0.0.0:${PORT}`);
     });
+  } else {
+    // Vercel Serverless 환경에서는 app.listen을 돌릴 필요 없이 모듈만 export하면 됩니다.
+    // 만약 Vercel이 아닌 일반 Node.js 호스팅 환경인 경우 listen 실행
+    if (!process.env.VERCEL) {
+      const distPath = path.join(process.cwd(), "dist");
+      app.use(express.static(distPath));
+      app.get("*", (req, res) => {
+        res.sendFile(path.join(distPath, "index.html"));
+      });
+      app.listen(PORT, "0.0.0.0", () => {
+        console.log(`Server running on http://0.0.0.0:${PORT}`);
+      });
+    }
   }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
-  });
 }
 
 startServer();
+
+export default app;
