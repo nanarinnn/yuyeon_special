@@ -1,23 +1,17 @@
 {
-  "version": 2,
-  "builds": [
+  "cleanUrls": true,
+  "rewrites": [
     {
-      "src": "server.ts",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "server.ts"
+      "source": "/api/gcs/rolling-paper-2026",
+      "destination": "/api/gcs-proxy"
     },
     {
-      "src": "/auth/(.*)",
-      "dest": "server.ts"
+      "source": "/api/auth/github/url",
+      "destination": "/api/github-url"
     },
     {
-      "src": "/(.*)",
-      "dest": "server.ts"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
